@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Navbar = () => {
+const AdminNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -26,35 +26,25 @@ const Navbar = () => {
           {/* Right side - Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
             <a
-              href="/"
+              href="/admin/dashboard"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               Home
             </a>
             <a
-              href="/category"
+              href="/admin/category"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               Category
             </a>
+          
             <a
-              href="/patients"
-              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Patient
-            </a>
-            <a
-              href="/doctor"
+              href="/admin/doctor"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               Doctor
             </a>
-            <a
-              href="/admin/login"
-              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Admin
-            </a>
+            
           </div>
 
           {/* Mobile menu button */}
@@ -93,7 +83,7 @@ const Navbar = () => {
             Home
           </a>
           <a
-            href="/category"
+            href="/admin/category"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
             Category
@@ -105,16 +95,16 @@ const Navbar = () => {
             Patient
           </a>
           <a
-            href="/doctor"
+            href="/admin/doctor"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
             Doctor
           </a>
           <a
-            href="/admin/login"
+            href="/contact"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
-            Admin
+            Contact Us
           </a>
         </div>
       </div>
@@ -122,4 +112,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default AdminNavbar;

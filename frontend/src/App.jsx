@@ -20,6 +20,7 @@ import AdminDashBoard from './components/admin/AdminDashBoard';
 import { checkAuth } from "./store/auth";
 import { useDispatch, useSelector } from "react-redux";
 import AdminLogin from './components/admin/AdminLogin';
+import AdminNavbar from './components/AdminNavbar';
 
 function App() {
   const dispatch = useDispatch();
@@ -31,20 +32,20 @@ function App() {
 
   return (
     <div className="flex flex-col overflow-hidden bg-white">
-      <Navbar />
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/patients" element={<Patient />} />
-        <Route path="/print-report" element={<PrintReport />} />
-        <Route path="/patient-form" element={<PatientForm />} />
+        <Route path="/" element={<><Navbar /><Home /></>} />
+        <Route path="/patients" element={<><Navbar /><Patient /></>} />
+        <Route path="/print-report" element={<><Navbar /><PrintReport /></>} />
+        <Route path="/patient-form" element={<><Navbar /><PatientForm /></>} />
 
         {/* Admin Routes (scoped under /admin) */}
-        <Route path="/admin/login" element={<CheckAuth><AdminLogin /></CheckAuth>} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
         {/* Protected Admin Routes */}
         <Route path="/admin/*" element={
-          <CheckAuth> 
+          <CheckAuth>
+            <AdminNavbar />
             <Routes>
               <Route path="dashboard" element={<AdminDashBoard />} />
               <Route path="doctor" element={<Doctor />} />
@@ -55,10 +56,11 @@ function App() {
               <Route path="addSubcategory" element={<SubCategoryForm />} />
             </Routes>
           </CheckAuth>
-        }/>
+        } />
       </Routes>
     </div>
   );
+
 }
 
 export default App;
