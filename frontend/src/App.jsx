@@ -40,7 +40,7 @@ function App() {
         <Route path="/patient-form" element={<PatientForm />} />
 
         {/* Admin Routes (scoped under /admin) */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<CheckAuth><AdminLogin /></CheckAuth>} />
 
         {/* Protected Admin Routes */}
         <Route path="/admin/*" element={
