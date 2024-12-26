@@ -23,11 +23,11 @@ import AdminLogin from './components/admin/AdminLogin';
 
 function App() {
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const loading = useSelector((state) => state.auth.loading);
-  useEffect(() => {
-    dispatch(checkAuth());
-  }, [isAuthenticated]);
+  // const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  // const loading = useSelector((state) => state.auth.loading);
+  // useEffect(() => {
+  //   dispatch(checkAuth());
+  // }, [dispatch]);
 
 
   return (
@@ -58,7 +58,7 @@ function App() {
         <Route
   path="/admin/*"
   element={
-    <CheckAuth isAuthenticated={isAuthenticated} loading={loading}>
+    <CheckAuth >
       <Routes>
         <Route path="dashboard" element={<AdminDashBoard />} />
         <Route path="doctor" element={<Doctor />} />

@@ -1,13 +1,41 @@
+import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
-function CheckAuth({ isAuthenticated, loading, children }) {
+function CheckAuth({ children }) {
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check authentication on component mount
+    const checkAuth = async () => {
+      try {
+        console.log("Checking auth...");
+        const response = await axios.get("http://localhost:5000/api/checkauth", {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
+
+        console.log("Auth check success:", response.data);
+        setIsAuthenticated(response.data.success);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [location]);
 
   console.log("Current Path:", location.pathname);
   console.log("Is Authenticated:", isAuthenticated);
   console.log("Loading State:", loading);
 
-  // Ensure authentication checks only occur after loading completes
+  // Show a loading indicator while the auth check is in progress
   if (loading) {
     console.log("Auth status loading...");
     return <div className="mt-52">Loading...</div>;
