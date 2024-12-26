@@ -5,7 +5,7 @@ import axios from "axios";
 function CheckAuth({ children }) {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
     // Check authentication on component mount

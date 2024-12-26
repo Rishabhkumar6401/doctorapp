@@ -29,52 +29,37 @@ function App() {
   //   dispatch(checkAuth());
   // }, [dispatch]);
 
-
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <Navbar />
       <Routes>
         {/* Public Routes */}
-        <Route
-          path="/"
-          element={<Home />}
-        />
-        <Route
-          path="/patients"
-          element={<Patient />}
-        />
-        <Route
-          path="/print-report"
-          element={<PrintReport />}
-        />
-        <Route
-          path="/patient-form"
-          element={<PatientForm />}
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/patients" element={<Patient />} />
+        <Route path="/print-report" element={<PrintReport />} />
+        <Route path="/patient-form" element={<PatientForm />} />
 
         {/* Admin Routes (scoped under /admin) */}
-         <Route path="/admin/login" element={<AdminLogin />} />
-        
-        <Route
-  path="/admin/*"
-  element={
-    <CheckAuth >
-      <Routes>
-        <Route path="dashboard" element={<AdminDashBoard />} />
-        <Route path="doctor" element={<Doctor />} />
-        <Route path="addDoctor" element={<DoctorForm />} />
-        <Route path="doctorReport" element={<DoctorReport />} />
-        <Route path="category" element={<Category />} />
-        <Route path="addCategory" element={<CategoryForm />} />
-        <Route path="addSubcategory" element={<SubCategoryForm />} /> 
-      </Routes>
-    </CheckAuth>
-  }
-/>
+        <Route path="/admin/login" element={<AdminLogin />} />
 
+        {/* Protected Admin Routes */}
+        <Route path="/admin/*" element={
+          <CheckAuth> 
+            <Routes>
+              <Route path="dashboard" element={<AdminDashBoard />} />
+              <Route path="doctor" element={<Doctor />} />
+              <Route path="addDoctor" element={<DoctorForm />} />
+              <Route path="doctorReport" element={<DoctorReport />} />
+              <Route path="category" element={<Category />} />
+              <Route path="addCategory" element={<CategoryForm />} />
+              <Route path="addSubcategory" element={<SubCategoryForm />} />
+            </Routes>
+          </CheckAuth>
+        }/>
       </Routes>
     </div>
   );
 }
 
 export default App;
+

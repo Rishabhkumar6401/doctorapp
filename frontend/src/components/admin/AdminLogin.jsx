@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../store/admin';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.adminLogin);
+  const { token, loading, error } = useSelector((state) => state.adminLogin);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -18,9 +18,15 @@ const AdminLogin = () => {
   };
 
   // Navigate to dashboard if login is successful
-  if (localStorage.getItem('token')) {
-    navigate('/admin/dashboard');
-  }
+  // if (localStorage.getItem('token')) {
+  //   navigate('/admin/dashboard');
+  // }
+
+  useEffect(()=>{
+    if (token) {
+        navigate('/admin/dashboard');
+      }
+  },[token,navigate])
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">

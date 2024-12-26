@@ -29,48 +29,40 @@ const PrintReport = () => {
     setLoading(true);
   
     try {
+      // Fetch the existing PDF bytes
       const existingPdfBytes = await fetch('/letter.pdf').then((res) => res.arrayBuffer());
   
+      // Load the PDF and get the first page
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const pages = pdfDoc.getPages();
-      const firstPage = pages[0];
+  
+      // Set custom page dimensions (A8 size)
+      const [firstPage] = pdfDoc.getPages();
+      firstPage.setSize(209, 144); // Width: 209 pts, Height: 144 pts
   
       const color = rgb(0, 0, 0);
       const boldColor = rgb(0, 0, 0.8);
-      const marginTop = 5; // Reduced margin from top
-      const lineHeight = 28; // Increased line height for more spacing
-      const colSpacing = 230; // Increased spacing between columns
+      const marginTop = 40;
+      const lineHeight = 6;
+      const colSpacing = 90; // Adjusted spacing between columns
+      const rightMargin = 5; // Margin from the right side
   
-      // Font sizes and positioning
-      const fontSizeTitle = 14;
-      const fontSizeText = 12;
-      let yPosition = 700 - marginTop; // Adjusted starting yPosition
+      const fontSizeText = 5;
+      let yPosition = 144 - marginTop;
   
-      const startX = 50;
-  
-      // Title removed
-      // firstPage.drawText('Order Report', {
-      //   x: startX,
-      //   y: yPosition,
-      //   size: fontSizeTitle,
-      //   color: boldColor,
-      //   font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-      // });
-  
-      yPosition -= 2 * lineHeight; // Adjust for next row
+      const startX = 7;
   
       // Serial No in single row
       firstPage.drawText(`Serial No: ${orderDetails.serialNo}`, {
         x: startX,
         y: yPosition,
-        size: fontSizeText,
+        size: fontSizeText ,
         color: boldColor,
         font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
       });
   
-      yPosition -= 1.5 * lineHeight;
+      yPosition -= 2.5 * lineHeight;
   
-      // Two fields per row layout (Only patient details)
+      // Two fields per row layout (Patient details)
       const fields = [
         { label: 'Patient Name', value: orderDetails.name },
         { label: 'Patient Age', value: orderDetails.age },
@@ -82,61 +74,54 @@ const PrintReport = () => {
         orderDetails.discount && { label: 'Discount', value: orderDetails.discount },
         { label: 'Final Payment', value: orderDetails.finalPayment },
         { label: 'Payment Mode', value: orderDetails.paymentMode },
-      ].filter(Boolean); // Only keeping patient details
+      ].filter(Boolean);
   
-      const maxColumnWidth = 200; // Maximum width for a column (for wrapping)
+      const maxWidth = colSpacing - 10; // Maximum width for wrapping
+      const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   
       for (let i = 0; i < fields.length; i += 2) {
         const field1 = fields[i];
         const field2 = fields[i + 1];
   
-        // Draw first field (left column)
+        // Calculate height required for the first field
         const field1Text = `${field1.label}: ${field1.value}`;
+        const field1Height = font.heightAtSize(fontSizeText) * Math.ceil(font.widthOfTextAtSize(field1Text, fontSizeText) / maxWidth);
+  
+        // Calculate height required for the second field
+        const field2Text = field2 ? `${field2.label}: ${field2.value}` : '';
+        const field2Height = field2
+          ? font.heightAtSize(fontSizeText) * Math.ceil(font.widthOfTextAtSize(field2Text, fontSizeText) / maxWidth)
+          : 0;
+  
+        // Determine row height (the tallest field in the row)
+        const rowHeight = Math.max(field1Height, field2Height);
+  
+        // Draw first field (left column)
         firstPage.drawText(field1Text, {
           x: startX,
           y: yPosition,
           size: fontSizeText,
           color,
-          font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+          font,
+          maxWidth,
+          lineHeight: lineHeight,
         });
-  
-        // Handle overflow for the first field (wrap text if needed)
-        if (field1Text.length > 40) {
-          yPosition -= lineHeight; // Move to the next line for overflow
-          firstPage.drawText(field1Text.slice(40), {
-            x: startX,
-            y: yPosition,
-            size: fontSizeText,
-            color,
-            font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-          });
-        }
   
         // Draw second field (right column)
         if (field2) {
-          const field2Text = `${field2.label}: ${field2.value}`;
           firstPage.drawText(field2Text, {
             x: startX + colSpacing,
             y: yPosition,
             size: fontSizeText,
             color,
-            font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+            font,
+            maxWidth: 209 - colSpacing - rightMargin,
+            lineHeight: lineHeight,
           });
-  
-          // Handle overflow for the second field (wrap text if needed)
-          if (field2Text.length > 40) {
-            yPosition -= lineHeight; // Move to the next line for overflow
-            firstPage.drawText(field2Text.slice(40), {
-              x: startX + colSpacing,
-              y: yPosition,
-              size: fontSizeText,
-              color,
-              font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-            });
-          }
         }
   
-        yPosition -= lineHeight; // Move to the next line after printing both fields
+        // Move to the next line, adjusted for the tallest field in the row
+        yPosition -= rowHeight + lineHeight;
       }
   
       // Save the PDF
@@ -155,6 +140,9 @@ const PrintReport = () => {
       setLoading(false);
     }
   };
+  
+  
+  
   
 
   
