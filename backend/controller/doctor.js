@@ -1,0 +1,156 @@
+const DoctorDB = require("../Model/Doctor");
+
+const AddDoctor = async (req, res) => {
+  const { name, email, phoneNo, address, totalCommission } = req.body;
+  try {
+    const CheckDoctor = await DoctorDB.findOne({ phoneNo });
+    if (CheckDoctor) {
+      return res.json({
+        success: false,
+        message: "Doctor already exists with the same phone no! Please try again",
+      });
+    }
+
+    const newDoctor = new DoctorDB({ name, email, phoneNo, address, totalCommission });
+    await newDoctor.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor registration successful",
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      success: false,
+      message: "Some error occurred",
+    });
+  }
+};
+
+const UpdateDoctor = async (req, res) => {
+  const { doctorId } = req.params;
+  const { name, email, phoneNo, address, totalCommission } = req.body;
+
+  try {
+    const updatedDoctor = await DoctorDB.findByIdAndUpdate(
+      doctorId,
+      { name, email, phoneNo, address, totalCommission },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedDoctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor updated successfully",
+      updatedDoctor,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      success: false,
+      message: "Some error occurred",
+    });
+  }
+};
+
+const DeleteDoctor = async (req, res) => {
+  const { doctorId } = req.params;
+
+  try {
+    const deletedDoctor = await DoctorDB.findByIdAndDelete(doctorId);
+
+    if (!deletedDoctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor deleted successfully",
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      success: false,
+      message: "Some error occurred",
+    });
+  }
+};
+
+// Get doctor by ID
+const GetDoctorById = async (req, res) => {
+    const { doctorId } = req.params;
+    if (doctorId==0){
+      return res.status(200).json({
+        success: true,
+        message: "Doctor selected none",
+        doctor:"none"
+      });
+
+    }
+  
+    try {
+      const doctor = await DoctorDB.findById(doctorId);
+  
+      if (!doctor) {
+        return res.status(404).json({
+          success: false,
+          message: "Doctor not found",
+        });
+      }
+  
+      res.status(200).json({
+        success: true,
+        doctor,
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({
+        success: false,
+        message: "Some error occurred",
+      });
+    }
+  };
+  
+  // Get all doctors
+  const GetAllDoctors = async (req, res) => {
+    try {
+      const doctors = await DoctorDB.find();
+  
+      if (!doctors || doctors.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No doctors found",
+        });
+      }
+  
+      res.status(200).json({
+        success: true,
+        doctors,
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({
+        success: false,
+        message: "Some error occurred",
+      });
+    }
+  };
+  
+  
+
+module.exports = {
+  AddDoctor,
+  UpdateDoctor,
+  DeleteDoctor,
+  GetDoctorById,
+  GetAllDoctors
+};

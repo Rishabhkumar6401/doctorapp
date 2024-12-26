@@ -1,0 +1,213 @@
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchDoctorById } from '../store/doctor';
+import { fetchSubcategoryDetail } from '../store/subcategories';
+import { useLocation } from 'react-router-dom';
+import { PDFDocument, rgb } from 'pdf-lib';
+import { useNavigate } from 'react-router-dom';
+import { StandardFonts } from 'pdf-lib';
+
+const PrintReport = () => {
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { orderDetails } = location.state || {};
+
+  const doctorDetails = useSelector((state) => state.doctors.doctorDetails);
+  const subcategory = useSelector((state) => state.subcategory.subcategory);
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!orderDetails || !orderDetails.referredBy || !orderDetails.subcategory) return;
+
+    dispatch(fetchDoctorById(orderDetails.referredBy));
+    dispatch(fetchSubcategoryDetail(orderDetails.subcategory));
+  }, [dispatch, orderDetails]);
+
+  const generatePdf = async () => {
+    setLoading(true);
+  
+    try {
+      const existingPdfBytes = await fetch('/letter.pdf').then((res) => res.arrayBuffer());
+  
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+  
+      const color = rgb(0, 0, 0);
+      const boldColor = rgb(0, 0, 0.8);
+      const marginTop = 5; // Reduced margin from top
+      const lineHeight = 28; // Increased line height for more spacing
+      const colSpacing = 230; // Increased spacing between columns
+  
+      // Font sizes and positioning
+      const fontSizeTitle = 14;
+      const fontSizeText = 12;
+      let yPosition = 700 - marginTop; // Adjusted starting yPosition
+  
+      const startX = 50;
+  
+      // Title removed
+      // firstPage.drawText('Order Report', {
+      //   x: startX,
+      //   y: yPosition,
+      //   size: fontSizeTitle,
+      //   color: boldColor,
+      //   font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+      // });
+  
+      yPosition -= 2 * lineHeight; // Adjust for next row
+  
+      // Serial No in single row
+      firstPage.drawText(`Serial No: ${orderDetails.serialNo}`, {
+        x: startX,
+        y: yPosition,
+        size: fontSizeText,
+        color: boldColor,
+        font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+      });
+  
+      yPosition -= 1.5 * lineHeight;
+  
+      // Two fields per row layout (Only patient details)
+      const fields = [
+        { label: 'Patient Name', value: orderDetails.name },
+        { label: 'Patient Age', value: orderDetails.age },
+        { label: 'Patient Address', value: orderDetails.address },
+        { label: 'Patient Phone No', value: orderDetails.phoneNo },
+        { label: 'Report Category', value: orderDetails.category },
+        { label: 'Report SubCategory', value: subcategory.name },
+        { label: 'Report Fee', value: orderDetails.fees },
+        orderDetails.discount && { label: 'Discount', value: orderDetails.discount },
+        { label: 'Final Payment', value: orderDetails.finalPayment },
+        { label: 'Payment Mode', value: orderDetails.paymentMode },
+      ].filter(Boolean); // Only keeping patient details
+  
+      const maxColumnWidth = 200; // Maximum width for a column (for wrapping)
+  
+      for (let i = 0; i < fields.length; i += 2) {
+        const field1 = fields[i];
+        const field2 = fields[i + 1];
+  
+        // Draw first field (left column)
+        const field1Text = `${field1.label}: ${field1.value}`;
+        firstPage.drawText(field1Text, {
+          x: startX,
+          y: yPosition,
+          size: fontSizeText,
+          color,
+          font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+        });
+  
+        // Handle overflow for the first field (wrap text if needed)
+        if (field1Text.length > 40) {
+          yPosition -= lineHeight; // Move to the next line for overflow
+          firstPage.drawText(field1Text.slice(40), {
+            x: startX,
+            y: yPosition,
+            size: fontSizeText,
+            color,
+            font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+          });
+        }
+  
+        // Draw second field (right column)
+        if (field2) {
+          const field2Text = `${field2.label}: ${field2.value}`;
+          firstPage.drawText(field2Text, {
+            x: startX + colSpacing,
+            y: yPosition,
+            size: fontSizeText,
+            color,
+            font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+          });
+  
+          // Handle overflow for the second field (wrap text if needed)
+          if (field2Text.length > 40) {
+            yPosition -= lineHeight; // Move to the next line for overflow
+            firstPage.drawText(field2Text.slice(40), {
+              x: startX + colSpacing,
+              y: yPosition,
+              size: fontSizeText,
+              color,
+              font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+            });
+          }
+        }
+  
+        yPosition -= lineHeight; // Move to the next line after printing both fields
+      }
+  
+      // Save the PDF
+      const pdfBytes = await pdfDoc.save();
+  
+      // Download the PDF
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Order_Report.pdf';
+      link.click();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  
+  
+  
+
+  if (!orderDetails || !subcategory) {
+    return <div className="text-center text-xl mt-40">  <p className="text-red-600 text-lg font-medium">
+    Some error occurred. Please fill the form again.
+  </p>
+  <button 
+    onClick={() => navigate("/patients")} 
+    className="px-6 py-2 bg-blue-500 text-white font-semibold text-xl rounded-lg shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+  >
+    Back
+  </button></div>;
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg mt-36">
+      <h1 className="text-3xl font-semibold text-center mb-8 text-gray-800">Report Details</h1>
+      <h6 className="text-md font-semibold text-center mb-8 text-gray-800"><strong className="text-gray-700">Serial No: </strong>{orderDetails.serialNo}</h6>
+
+      {/* Order Details in Two Columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+        <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+          <p><strong className="text-gray-700">Patient Name:</strong> {orderDetails.name}</p>
+          <p><strong className="text-gray-700">Patient Age:</strong> {orderDetails.age}</p>
+          <p><strong className="text-gray-700">Patient Address:</strong> {orderDetails.address}</p>
+          <p><strong className="text-gray-700">Patient Phone No:</strong> {orderDetails.phoneNo}</p>
+          {doctorDetails && doctorDetails !== 0 && (
+            <p><strong className="text-gray-700">Doctor Referred By:</strong> {doctorDetails.name}</p>
+          )}
+        </div>
+
+        <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+          <p><strong className="text-gray-700">Report Category:</strong> {orderDetails.category}</p>
+          <p><strong className="text-gray-700">Report SubCategory:</strong> {subcategory.name}</p>
+          <p><strong className="text-gray-700">Report Fee:</strong> {orderDetails.fees}</p>
+          {orderDetails.discount && <p><strong className="text-gray-700">Discount:</strong> {orderDetails.discount}</p>}
+          <p><strong className="text-gray-700">Final Payment:</strong> {orderDetails.finalPayment}</p>
+          <p><strong className="text-gray-700">Payment Mode:</strong> {orderDetails.paymentMode}</p>
+        </div>
+      </div>
+
+      <button
+        onClick={generatePdf}
+        className="w-full mt-6 py-3 px-6 bg-green-500 text-white rounded-lg text-lg hover:bg-green-600 transition-all duration-300"
+      >
+        {loading ? 'Generating PDF...' : 'Generate PDF'}
+      </button>
+    </div>
+  );
+};
+
+export default PrintReport;
