@@ -1,59 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDoctors } from "../../store/doctor";
+import { fetchAllPatients } from "../../store/patient";
+import { fetchAllOrders } from "../../store/order"; // Import action to fetch orders
 
 const AdminDashBoard = () => {
+  const dispatch = useDispatch();
+
+  // Selecting data from the Redux store
+  const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors);
+  const { allPatients, loading: patientsLoading } = useSelector((state) => state.patient);
+  const { allOrders, loading: ordersLoading } = useSelector((state) => state.order); // Select orders
+
+  // Fetch doctors, patients, and orders on component mount
+  useEffect(() => {
+    dispatch(fetchDoctors());
+    dispatch(fetchAllPatients());
+    dispatch(fetchAllOrders()); // Dispatch action to fetch orders
+  }, [dispatch]);
+
   return (
     <div className="flex h-screen bg-gray-100 mt-16">
-      {/* Sidebar */}
-      <aside className="w-64 bg-blue-900 text-white flex flex-col">
-        <div className="px-6 py-4">
-          <h1 className="text-2xl font-bold tracking-wide">Admin Dashboard</h1>
-        </div>
-        <nav className="flex-grow">
-          <ul className="space-y-2 px-4">
-            <li>
-              <a
-                href="#"
-                className="flex items-center p-3 text-gray-200 hover:bg-blue-700 rounded-md"
-              >
-                <span className="material-icons-outlined mr-3">local_hospital</span>
-                Doctors
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="flex items-center p-3 text-gray-200 hover:bg-blue-700 rounded-md"
-              >
-                <span className="material-icons-outlined mr-3">person</span>
-                Patients
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="flex items-center p-3 text-gray-200 hover:bg-blue-700 rounded-md"
-              >
-                <span className="material-icons-outlined mr-3">category</span>
-                Categories
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="flex items-center p-3 text-gray-200 hover:bg-blue-700 rounded-md"
-              >
-                <span className="material-icons-outlined mr-3">layers</span>
-                Subcategories
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <div className="px-4 py-4">
-          <button className="w-full py-2 px-4 bg-red-500 hover:bg-red-600 rounded-md text-white font-semibold">
-            Logout
-          </button>
-        </div>
-      </aside>
+      {/* Sidebar can go here */}
 
       {/* Main Content */}
       <main className="flex-1 p-6 overflow-auto">
@@ -68,15 +36,21 @@ const AdminDashBoard = () => {
           {/* Stats Cards */}
           <div className="p-6 bg-white rounded-md shadow-md">
             <h3 className="text-lg font-medium text-gray-600">Total Doctors</h3>
-            <p className="mt-2 text-3xl font-bold text-gray-800">150</p>
+            <p className="mt-2 text-3xl font-bold text-gray-800">
+              {doctorsLoading ? "Loading..." : doctors?.length || 0}
+            </p>
           </div>
           <div className="p-6 bg-white rounded-md shadow-md">
             <h3 className="text-lg font-medium text-gray-600">Total Patients</h3>
-            <p className="mt-2 text-3xl font-bold text-gray-800">350</p>
+            <p className="mt-2 text-3xl font-bold text-gray-800">
+              {patientsLoading ? "Loading..." : allPatients?.length || 0}
+            </p>
           </div>
           <div className="p-6 bg-white rounded-md shadow-md">
-            <h3 className="text-lg font-medium text-gray-600">Categories</h3>
-            <p className="mt-2 text-3xl font-bold text-gray-800">10</p>
+            <h3 className="text-lg font-medium text-gray-600">Total Reports</h3>
+            <p className="mt-2 text-3xl font-bold text-gray-800">
+              {ordersLoading ? "Loading..." : allOrders?.length || 0}
+            </p>
           </div>
         </div>
 
@@ -84,18 +58,24 @@ const AdminDashBoard = () => {
           <h3 className="text-xl font-semibold text-gray-700 mb-4">Recent Activities</h3>
           <div className="bg-white p-4 rounded-md shadow-md">
             <ul className="divide-y divide-gray-200">
-              <li className="py-2 flex justify-between">
-                <span className="text-gray-600">Dr. John added a new patient.</span>
-                <span className="text-sm text-gray-400">5 mins ago</span>
-              </li>
-              <li className="py-2 flex justify-between">
-                <span className="text-gray-600">New category created: Pediatrics.</span>
-                <span className="text-sm text-gray-400">10 mins ago</span>
-              </li>
-              <li className="py-2 flex justify-between">
-                <span className="text-gray-600">Patient appointment confirmed.</span>
-                <span className="text-sm text-gray-400">30 mins ago</span>
-              </li>
+              {doctorsLoading || patientsLoading || ordersLoading ? (
+                <li className="py-2 text-gray-600">Loading recent activities...</li>
+              ) : (
+                <>
+                  <li className="py-2 flex justify-between">
+                    <span className="text-gray-600">Data</span>
+                    <span className="text-sm text-gray-400">doctor</span>
+                  </li>
+                  <li className="py-2 flex justify-between">
+                    <span className="text-gray-600">Data</span>
+                    <span className="text-sm text-gray-400">doctor</span>
+                  </li>
+                  <li className="py-2 flex justify-between">
+                    <span className="text-gray-600">data</span>
+                    <span className="text-sm text-gray-400">doctor</span>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
         </section>

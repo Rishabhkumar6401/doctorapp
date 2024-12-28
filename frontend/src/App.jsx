@@ -21,6 +21,7 @@ import { checkAuth } from "./store/auth";
 import { useDispatch, useSelector } from "react-redux";
 import AdminLogin from './components/admin/AdminLogin';
 import AdminNavbar from './components/AdminNavbar';
+import AdminOrdersPage from './components/AdminOrderPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -34,8 +35,8 @@ function App() {
     <div className="flex flex-col overflow-hidden bg-white">
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<><Navbar /><Home /></>} />
-        <Route path="/patients" element={<><Navbar /><Patient /></>} />
+        <Route path="/" element={<><Navbar /><Patient /></>} />
+        {/* <Route path="/patients" element={<><Navbar /><Patient /></>} /> */}
         <Route path="/print-report" element={<><Navbar /><PrintReport /></>} />
         <Route path="/patient-form" element={<><Navbar /><PatientForm /></>} />
 
@@ -54,6 +55,7 @@ function App() {
               <Route path="category" element={<Category />} />
               <Route path="addCategory" element={<CategoryForm />} />
               <Route path="addSubcategory" element={<SubCategoryForm />} />
+              <Route path="reports" element={<AdminOrdersPage />} />
             </Routes>
           </CheckAuth>
         } />

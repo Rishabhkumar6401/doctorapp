@@ -11,6 +11,7 @@ const SubCategoryForm = () => {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [message, setMessage] = useState('');
+  const [editingSubCategory, setEditingSubCategory] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -46,18 +47,32 @@ const SubCategoryForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/addSubCategory', formData);
-      setMessage(response.data.message || 'Subcategory added successfully!');
+      let response;
+      if (editingSubCategory) {
+        // Update existing subcategory
+        response = await axios.put(
+          `http://localhost:5000/api/subcategory/${editingSubCategory._id}`,
+          formData
+        );
+        setMessage(response.data.message || 'Subcategory updated successfully!');
+      } else {
+        // Add new subcategory
+        response = await axios.post('http://localhost:5000/api/addSubCategory', formData);
+        setMessage(response.data.message || 'Subcategory added successfully!');
+      }
+
+      // Reset form and reload subcategories
       setFormData({
         name: '',
         category: '',
         price: '',
         referralFee: '',
       });
+      setEditingSubCategory(null);
       fetchSubCategories();
     } catch (error) {
       console.error(error);
-      setMessage('An error occurred while adding the subcategory.');
+      setMessage('An error occurred while processing the subcategory.');
     }
   };
 
@@ -75,12 +90,24 @@ const SubCategoryForm = () => {
     }
   };
 
+  const handleEdit = (subCategory) => {
+    setEditingSubCategory(subCategory);
+    setFormData({
+      name: subCategory.name,
+      category: subCategory.category,
+      price: subCategory.price,
+      referralFee: subCategory.referralFee,
+    });
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 mt-24">
-      <h1 className="text-3xl font-bold mb-8 text-blue-600">Add SubCategory</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
+      <h1 className="text-3xl font-extrabold text-center mb-8 text-blue-600">
+        {editingSubCategory ? 'Edit SubCategory' : 'Add SubCategory'}
+      </h1>
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md"
+        className="bg-white shadow-lg rounded-lg p-8 w-full max-w-xl"
       >
         <div className="mb-4">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -93,9 +120,10 @@ const SubCategoryForm = () => {
             value={formData.name}
             onChange={handleChange}
             required
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+
         <div className="mb-4">
           <label htmlFor="category" className="block text-sm font-medium text-gray-700">
             Category:
@@ -106,7 +134,7 @@ const SubCategoryForm = () => {
             value={formData.category}
             onChange={handleChange}
             required
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="" disabled>
               Select a category
@@ -118,6 +146,7 @@ const SubCategoryForm = () => {
             ))}
           </select>
         </div>
+
         <div className="mb-4">
           <label htmlFor="price" className="block text-sm font-medium text-gray-700">
             Price:
@@ -129,9 +158,10 @@ const SubCategoryForm = () => {
             value={formData.price}
             onChange={handleChange}
             required
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+
         <div className="mb-4">
           <label htmlFor="referralFee" className="block text-sm font-medium text-gray-700">
             Referral Fee:
@@ -143,14 +173,15 @@ const SubCategoryForm = () => {
             value={formData.referralFee}
             onChange={handleChange}
             required
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          Submit
+          {editingSubCategory ? 'Update SubCategory' : 'Add SubCategory'}
         </button>
       </form>
 
@@ -159,27 +190,33 @@ const SubCategoryForm = () => {
       )}
 
       {/* SubCategory List */}
-      <div className="mt-8 w-full max-w-2xl">
-        <h2 className="text-2xl font-bold mb-4 text-gray-700">SubCategory List</h2>
+      <div className="mt-8 w-full max-w-2xl overflow-x-auto">
+        <h2 className="text-2xl font-bold mb-6 text-gray-700">SubCategory List</h2>
         {subCategories.length > 0 ? (
-          <table className="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
+          <table className="min-w-full bg-white shadow-lg rounded-lg">
             <thead>
               <tr className="bg-gray-200 text-gray-700">
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Category</th>
-                <th className="px-4 py-2">Price</th>
-                <th className="px-4 py-2">Referral Fee</th>
-                <th className="px-4 py-2">Actions</th>
+                <th className="px-6 py-3 text-left">Name</th>
+                <th className="px-6 py-3 text-left">Category</th>
+                <th className="px-6 py-3 text-left">Price</th>
+                <th className="px-6 py-3 text-left">Referral Fee</th>
+                <th className="px-6 py-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {subCategories.map((subCat) => (
-                <tr key={subCat._id} className="border-b text-center">
-                  <td className="px-4 py-2">{subCat.name}</td>
-                  <td className="px-4 py-2">{subCat.category || 'N/A'}</td>
-                  <td className="px-4 py-2">{subCat.price}</td>
-                  <td className="px-4 py-2">{subCat.referralFee}</td>
-                  <td className="px-4 py-2">
+                <tr key={subCat._id} className="border-t text-gray-700 hover:bg-gray-50">
+                  <td className="px-6 py-4">{subCat.name}</td>
+                  <td className="px-6 py-4">{subCat.category || 'N/A'}</td>
+                  <td className="px-6 py-4">{subCat.price}</td>
+                  <td className="px-6 py-4">{subCat.referralFee}</td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => handleEdit(subCat)}
+                      className="text-yellow-600 hover:underline mx-2"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => handleDelete(subCat._id)}
                       className="text-red-600 hover:underline"

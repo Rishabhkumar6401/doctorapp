@@ -37,9 +37,14 @@ function CheckAuth({ children }) {
 
   // Show a loading indicator while the auth check is in progress
   if (loading) {
-    console.log("Auth status loading...");
-    return <div className="mt-52">Loading...</div>;
+    // console.log("Auth status loading...");
+    return (
+      <div className="flex justify-center items-center mt-64">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
+  
 
   // Redirect authenticated users trying to access the login page
   if (isAuthenticated && location.pathname === "/admin/login") {

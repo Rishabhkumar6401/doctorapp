@@ -13,15 +13,14 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo and App Name */}
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                <span className="text-white text-xl">D</span>
-              </div>
-            </div>
-            <div className="ml-3 font-bold text-xl text-blue-600">
-              DoctorApp
-            </div>
-          </div>
+  <img 
+    src="/logo.png" 
+    alt="DoctorApp Logo" 
+    className="h-16"
+  />
+</div>
+
+
 
           {/* Right side - Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
@@ -31,23 +30,23 @@ const Navbar = () => {
             >
               Home
             </a>
-            <a
+            {/* <a
               href="/category"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               Category
-            </a>
-            <a
+            </a> */}
+            {/* <a
               href="/patients"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               Patient
-            </a>
+            </a> */}
             <a
-              href="/doctor"
+              href="/patient-form"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Doctor
+              Patient Form
             </a>
             <a
               href="/admin/login"
@@ -92,23 +91,23 @@ const Navbar = () => {
           >
             Home
           </a>
-          <a
+          {/* <a
             href="/category"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
             Category
-          </a>
-          <a
+          </a> */}
+          {/* <a
             href="/patients"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
             Patient
-          </a>
+          </a> */}
           <a
-            href="/doctor"
+            href="/patient-form"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
-            Doctor
+            Patient Form
           </a>
           <a
             href="/admin/login"

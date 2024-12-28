@@ -15,6 +15,20 @@ export const fetchPatients = createAsyncThunk(
   }
 );
 
+// Thunk to fetch all patients
+export const fetchAllPatients = createAsyncThunk(
+  'patient/fetchAllPatients',
+  async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/allPatients');
+      return response.data.patients || [];
+    } catch (error) {
+      console.error('Error fetching all patients:', error);
+      return [];
+    }
+  }
+);
+
 // Thunk to add a new patient
 export const addPatient = createAsyncThunk(
   'patient/addPatient',
@@ -49,6 +63,7 @@ const patientSlice = createSlice({
   initialState: {
     phoneNo: '',
     patients: [],
+    allPatients: [], // Add allPatients state
     isNewEntry: true,
     loading: false, // Add loading state
     error: null, // For capturing errors
@@ -72,6 +87,16 @@ const patientSlice = createSlice({
         state.loading = false; // Set loading to false once the request is fulfilled
       })
       .addCase(fetchPatients.rejected, (state) => {
+        state.loading = false; // Set loading to false if the request is rejected
+      })
+      .addCase(fetchAllPatients.pending, (state) => {
+        state.loading = true; // Set loading to true when the request is pending
+      })
+      .addCase(fetchAllPatients.fulfilled, (state, action) => {
+        state.allPatients = action.payload; // Update allPatients with the response data
+        state.loading = false; // Set loading to false once the request is fulfilled
+      })
+      .addCase(fetchAllPatients.rejected, (state) => {
         state.loading = false; // Set loading to false if the request is rejected
       })
       .addCase(addPatient.pending, (state) => {

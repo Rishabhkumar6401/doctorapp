@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { logout } from '../store/auth'; // Adjust the path as necessary
+import { useNavigate } from 'react-router-dom';
 
 const AdminNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/admin/login")
+    
+    
   };
 
   return (
@@ -15,11 +27,11 @@ const AdminNavbar = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                <span className="text-white text-xl">D</span>
+                <span className="text-white text-xl">A</span>
               </div>
             </div>
             <div className="ml-3 font-bold text-xl text-blue-600">
-              DoctorApp
+              Admin
             </div>
           </div>
 
@@ -37,14 +49,24 @@ const AdminNavbar = () => {
             >
               Category
             </a>
-          
             <a
               href="/admin/doctor"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               Doctor
             </a>
-            
+            <a
+              href="/admin/reports"
+              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Reports
+            </a>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600"
+            >
+              Logout
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -106,6 +128,12 @@ const AdminNavbar = () => {
           >
             Contact Us
           </a>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-red-600"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </nav>

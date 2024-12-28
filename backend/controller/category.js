@@ -38,7 +38,7 @@ const UpdateCategory = async (req, res) => {
 
     const updatedCategory = await Category.findByIdAndUpdate(
       id,
-      { name: name.toLowerCase() },
+      { name:name },
       { new: true, runValidators: true }
     );
 

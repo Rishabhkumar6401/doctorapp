@@ -91,4 +91,89 @@ const fetchOrder = async (req, res) => {
   }
 };
 
-module.exports = { PlaceOrder, fetchOrder };
+const fetchAllOrder = async (req, res) => {
+  try {
+    // Fetch all orders from the database
+    const orders = await Order.find();
+
+    if (orders.length === 0) {
+      return res.status(404).json({
+        message: 'No orders found',
+      });
+    }
+
+    // Send success response with all orders
+    res.status(200).json({
+      message: 'Orders fetched successfully',
+      orders,
+    });
+  } catch (error) {
+    console.error('Error fetching all orders:', error);
+    res.status(500).json({
+      message: 'Error fetching all orders',
+      error: error.message,
+    });
+  }
+};
+
+const EditOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params; // Order ID is passed in the URL parameters
+    const updateData = req.body;    // The data to update is passed in the request body
+
+    // Find the order by ID and update it with the new data
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, {
+      new: true,    // This ensures that the updated order is returned
+      runValidators: true, // This ensures the model validation is run during the update
+    });
+
+    if (!updatedOrder) {
+      return res.status(404).json({
+        message: 'Order not found',
+      });
+    }
+
+    // Send success response with the updated order data
+    res.status(200).json({
+      message: 'Order updated successfully',
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error('Error updating order:', error);
+    res.status(500).json({
+      message: 'Error updating order',
+      error: error.message,
+    });
+  }
+};
+
+const DeleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params; // Order ID is passed in the URL parameters
+
+    // Find the order by ID and delete it
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+
+    if (!deletedOrder) {
+      return res.status(404).json({
+        message: 'Order not found',
+      });
+    }
+
+    // Send success response
+    res.status(200).json({
+      message: 'Order deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({
+      message: 'Error deleting order',
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+module.exports = { PlaceOrder, fetchOrder, fetchAllOrder, EditOrder, DeleteOrder};

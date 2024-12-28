@@ -15,11 +15,27 @@ export const placeOrder = createAsyncThunk(
   }
 );
 
+// Thunk to fetch all orders
+export const fetchAllOrders = createAsyncThunk(
+  'order/fetchAllOrders',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/fetchAllOrder');
+      console.log(response.data)
+      return response.data.orders; // Assuming the response contains the array of orders
+    } catch (error) {
+      console.error('Error fetching all orders:', error);
+      return rejectWithValue('Failed to fetch orders');
+    }
+  }
+);
+
 // Creating a slice for order
 const orderSlice = createSlice({
   name: 'order',
   initialState: {
     orderDetails: null,
+    allOrders: [], // Store all fetched orders
     loading: false,
     error: null, // For capturing errors
     status: 'idle', // New field to track order status
@@ -29,6 +45,7 @@ const orderSlice = createSlice({
     resetOrderState: (state) => {
       // Resets the order state
       state.orderDetails = null;
+      state.allOrders = [];
       state.loading = false;
       state.error = null;
       state.status = 'idle';
@@ -36,19 +53,35 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Place Order
       .addCase(placeOrder.pending, (state) => {
-        state.loading = true; // Set loading to true when placing order
-        state.status = 'pending'; // Set status to 'pending'
+        state.loading = true;
+        state.status = 'pending';
       })
       .addCase(placeOrder.fulfilled, (state, action) => {
-        state.orderDetails = action.payload; // Store the placed order details
-        state.loading = false; // Set loading to false once the order is placed
-        state.status = 'success'; // Set status to 'success'
+        state.orderDetails = action.payload;
+        state.loading = false;
+        state.status = 'success';
       })
       .addCase(placeOrder.rejected, (state, action) => {
-        state.loading = false; // Set loading to false if the request is rejected
-        state.error = action.payload; // Set error message if the request fails
-        state.status = 'failed'; // Set status to 'failed'
+        state.loading = false;
+        state.error = action.payload;
+        state.status = 'failed';
+      })
+      // Fetch All Orders
+      .addCase(fetchAllOrders.pending, (state) => {
+        state.loading = true;
+        state.status = 'pending';
+      })
+      .addCase(fetchAllOrders.fulfilled, (state, action) => {
+        state.allOrders = action.payload;
+        state.loading = false;
+        state.status = 'success';
+      })
+      .addCase(fetchAllOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.status = 'failed';
       });
   },
 });
