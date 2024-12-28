@@ -2,27 +2,24 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import  Modal  from "./model";
+import Modal from "./model";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
-import { fetchAllOrders } from "../store/order"; 
+import { fetchAllOrders } from "../store/order";
 import { useDispatch, useSelector } from "react-redux";
-
+import ModalEditForm from "./ModalEditForm";
+import axios from "axios";
 
 const AdminOrdersPage = () => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [doctors, setDoctors] = useState([]);
   const [editOrderData, setEditOrderData] = useState(null);
+  const [doctors, setDoctors] = useState([]);
   const { allOrders, loading: ordersLoading } = useSelector((state) => state.order);
 
   useEffect(() => {
-    
-       
-      
     const fetchDoctors = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/doctors");
@@ -36,12 +33,63 @@ const AdminOrdersPage = () => {
     dispatch(fetchAllOrders());
     fetchDoctors();
   }, []);
+  
+  const handleEditSubmit = async (formData) => {
+    try {
+      const orderId = editOrderData._id; // Get the current order ID
+      const updatedData = formData; // The updated data from the form
+  
+      // Make a PUT request to update the order
+      const response = await axios.put(`http://localhost:5000/api/orders/${orderId}`, updatedData);
+      
+      // Log the response for debugging
+      console.log('Order updated successfully', response.data);
+  
+      // After a successful update, fetch the updated list of orders
+      // This could be done by calling a function to re-fetch orders or by updating local state
+      dispatch(fetchAllOrders()); // Assuming you have a function `fetchOrders` to get the latest data
+  
+      // Close the modal after the update
+      setEditOrderData(null);
+    } catch (error) {
+      // Handle any errors
+      console.error('Error updating order', error);
+    }
+  };
+  
+  
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
   };
 
-  
+  const handleEditOrder = (order) => {
+    setEditOrderData(order);
+  };
+
+  const handleUpdateOrder = async (formData) => {
+    if (!editOrderData) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/orders/${editOrderData._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editOrderData),
+      });
+
+      if (response.ok) {
+        alert("Order updated successfully!");
+        setEditOrderData(null);
+        dispatch(fetchAllOrders());
+      } else {
+        alert("Failed to update the order.");
+      }
+    } catch (error) {
+      console.error("Error updating the order:", error);
+    }
+  };
 
   const handleDeleteOrder = async (orderId) => {
     const confirmation = window.confirm("Are you sure you want to delete this order?");
@@ -53,9 +101,8 @@ const AdminOrdersPage = () => {
 
         if (response.ok) {
           alert("Order deleted successfully!");
-          window.location.reload();
-          // Remove the deleted order from the state
           setOrders(orders.filter((order) => order._id !== orderId));
+          dispatch(fetchAllOrders());
         } else {
           alert("Failed to delete the order.");
         }
@@ -93,14 +140,14 @@ const AdminOrdersPage = () => {
                   </td>
                   <td className="border border-gray-200 px-4 py-2">{doctor ? doctor.name : "None"}</td>
                   <td className="border border-gray-200 px-4 py-2 text-left">
-  <div className="flex space-x-2"> {/* Flexbox container with spacing */}
-    <Button onClick={() => handleViewDetails(order)}>View Details</Button>
-    <Button className="ml-2" onClick={() => handleDeleteOrder(order._id)}>
-      Delete
-    </Button>
-  </div>
-</td>
-
+                    <div className="flex space-x-2">
+                      <Button onClick={() => handleViewDetails(order)}>View Details</Button>
+                      <Button onClick={() => handleEditOrder(order)}>Edit</Button>
+                      <Button className="ml-2" onClick={() => handleDeleteOrder(order._id)}>
+                        Delete
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
@@ -109,13 +156,18 @@ const AdminOrdersPage = () => {
       </div>
 
       {selectedOrder && (
-  <Modal 
-    isOpen={true} 
-    onClose={() => setSelectedOrder(null)} 
-    selectedOrder={selectedOrder} // Pass selectedOrder as prop
-  />
-)}
+        <Modal
+          isOpen={true}
+          onClose={() => setSelectedOrder(null)}
+          selectedOrder={selectedOrder}
+        />
+      )}
 
+      {editOrderData && (
+        <ModalEditForm isOpen={true} onClose={() => setEditOrderData(null)}  onSubmit = {handleEditSubmit} initialData= {editOrderData}>
+          
+        </ModalEditForm>
+      )}
     </div>
   );
 };
