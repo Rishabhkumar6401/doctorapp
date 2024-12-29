@@ -159,15 +159,15 @@ const PrintReport = () => {
 
       // this code download report with dynamic name
 
-    //   const pdfFileName = `${orderDetails.name.replace(/\s+/g, '_')}_${orderDetails.serialNo}.pdf`;
+      const pdfFileName = `${orderDetails.name.replace(/\s+/g, '_')}_${orderDetails.serialNo}.pdf`;
 
   
-    // const link = document.createElement('a');
-    // link.href = url;
-    // link.download = pdfFileName; 
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = pdfFileName; 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
     // yaha tak hai dynamic report download krne ka code if need uncomment above lines
   
