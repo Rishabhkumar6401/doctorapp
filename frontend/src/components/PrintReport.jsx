@@ -31,38 +31,39 @@ const PrintReport = () => {
     try {
       // Fetch the existing PDF bytes
       const existingPdfBytes = await fetch('/letter.pdf').then((res) => res.arrayBuffer());
+      if (!existingPdfBytes) {
+        throw new Error('Failed to fetch the existing PDF.');
+      }
   
       // Load the PDF and get the first page
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
-  
-      // Set custom page dimensions (A8 size)
       const [firstPage] = pdfDoc.getPages();
-      firstPage.setSize(209, 144); // Width: 209 pts, Height: 144 pts
+      firstPage.setSize(209, 144); // A8 size
   
       const color = rgb(0, 0, 0);
       const boldColor = rgb(0, 0, 0.8);
       const marginTop = 40;
-      const lineHeight = 6;
-      const colSpacing = 90; // Adjusted spacing between columns
-      const rightMargin = 5; // Margin from the right side
-  
+      const lineHeight = 6; // Standard line height
+      const additionalLineHeight = 2; // Extra space between wrapped lines
+      const colSpacing = 90;
+      const rightMargin = 5;
       const fontSizeText = 5;
       let yPosition = 144 - marginTop;
   
       const startX = 7;
   
-      // Serial No in single row
+      // Serial Number
       firstPage.drawText(`Serial No: ${orderDetails.serialNo}`, {
         x: startX,
         y: yPosition,
-        size: fontSizeText ,
+        size: fontSizeText,
         color: boldColor,
         font: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
       });
   
       yPosition -= 2.5 * lineHeight;
   
-      // Two fields per row layout (Patient details)
+      // Patient Details (Two-column Layout)
       const fields = [
         { label: 'Patient Name', value: orderDetails.name },
         { label: 'Patient Age', value: orderDetails.age },
@@ -76,70 +77,119 @@ const PrintReport = () => {
         { label: 'Payment Mode', value: orderDetails.paymentMode },
       ].filter(Boolean);
   
-      const maxWidth = colSpacing - 10; // Maximum width for wrapping
+      const maxWidth = colSpacing - 10;
       const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  
+      // Function to wrap text manually
+      const wrapText = (text, maxWidth, font, fontSize) => {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = '';
+        
+        words.forEach((word) => {
+          const testLine = currentLine ? currentLine + ' ' + word : word;
+          const width = font.widthOfTextAtSize(testLine, fontSize);
+          
+          if (width <= maxWidth) {
+            currentLine = testLine;
+          } else {
+            if (currentLine) {
+              lines.push(currentLine);
+            }
+            currentLine = word;
+          }
+        });
+  
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+  
+        return lines;
+      };
   
       for (let i = 0; i < fields.length; i += 2) {
         const field1 = fields[i];
         const field2 = fields[i + 1];
   
-        // Calculate height required for the first field
         const field1Text = `${field1.label}: ${field1.value}`;
-        const field1Height = font.heightAtSize(fontSizeText) * Math.ceil(font.widthOfTextAtSize(field1Text, fontSizeText) / maxWidth);
-  
-        // Calculate height required for the second field
         const field2Text = field2 ? `${field2.label}: ${field2.value}` : '';
-        const field2Height = field2
-          ? font.heightAtSize(fontSizeText) * Math.ceil(font.widthOfTextAtSize(field2Text, fontSizeText) / maxWidth)
-          : 0;
   
-        // Determine row height (the tallest field in the row)
+        // Wrap the text
+        const field1Lines = wrapText(field1Text, maxWidth, font, fontSizeText);
+        const field2Lines = field2 ? wrapText(field2Text, maxWidth, font, fontSizeText) : [];
+  
+        // Calculate the height of each field
+        const field1Height = field1Lines.length * font.heightAtSize(fontSizeText);
+        const field2Height = field2Lines.length * font.heightAtSize(fontSizeText);
+  
+        // Determine the row height
         const rowHeight = Math.max(field1Height, field2Height);
   
-        // Draw first field (left column)
-        firstPage.drawText(field1Text, {
-          x: startX,
-          y: yPosition,
-          size: fontSizeText,
-          color,
-          font,
-          maxWidth,
-          lineHeight: lineHeight,
-        });
-  
-        // Draw second field (right column)
-        if (field2) {
-          firstPage.drawText(field2Text, {
-            x: startX + colSpacing,
-            y: yPosition,
+        // Draw the first field (left column)
+        field1Lines.forEach((line, index) => {
+          firstPage.drawText(line, {
+            x: startX,
+            y: yPosition - (index * (font.heightAtSize(fontSizeText) + additionalLineHeight)), // Added extra space for wrapped lines
             size: fontSizeText,
             color,
             font,
-            maxWidth: 209 - colSpacing - rightMargin,
-            lineHeight: lineHeight,
+          });
+        });
+  
+        // Draw the second field (right column)
+        if (field2) {
+          field2Lines.forEach((line, index) => {
+            firstPage.drawText(line, {
+              x: startX + colSpacing,
+              y: yPosition - (index * (font.heightAtSize(fontSizeText) + additionalLineHeight)), // Added extra space for wrapped lines
+              size: fontSizeText,
+              color,
+              font,
+            });
           });
         }
   
-        // Move to the next line, adjusted for the tallest field in the row
-        yPosition -= rowHeight + lineHeight;
+        yPosition -= rowHeight + lineHeight; // Move to the next row
       }
   
-      // Save the PDF
+      // Save the PDF and create a blob
       const pdfBytes = await pdfDoc.save();
-  
-      // Download the PDF
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Order_Report.pdf';
-      link.click();
+
+      // this code download report with dynamic name
+
+    //   const pdfFileName = `${orderDetails.name.replace(/\s+/g, '_')}_${orderDetails.serialNo}.pdf`;
+
+  
+    // const link = document.createElement('a');
+    // link.href = url;
+    // link.download = pdfFileName; 
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+
+    // yaha tak hai dynamic report download krne ka code if need uncomment above lines
+  
+      // Open PDF in a new tab
+      const pdfWindow = window.open(url, '_blank');
+      if (!pdfWindow) {
+        throw new Error('Failed to open PDF in a new tab. Please allow popups for this site.');
+      }
+  
+      // Delay print to ensure the PDF is fully loaded
+      pdfWindow.onload = () => {
+        pdfWindow.print();
+      };
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error generating PDF:', error); // Logs the specific error
+      alert(`An error occurred while generating the PDF: ${error.message}. Please try again.`);
     } finally {
       setLoading(false);
     }
   };
+  
+  
   
   
   
