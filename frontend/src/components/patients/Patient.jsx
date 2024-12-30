@@ -82,7 +82,7 @@ const Patient = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="absolute right-8 top-24 hidden lg:block">
+      <div className="absolute right-4 top-24 hidden lg:block">
         <img src="./src/assets/pateint.svg" alt="Patient" className="w-[39rem] h-[36rem]" />
       </div>
 
