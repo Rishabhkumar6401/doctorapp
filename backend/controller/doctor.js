@@ -1,17 +1,17 @@
 const DoctorDB = require("../Model/Doctor");
 
 const AddDoctor = async (req, res) => {
-  const { name, email, phoneNo, address, totalCommission } = req.body;
+  const { name, phoneNo, address, totalCommission } = req.body;
   try {
-    const CheckDoctor = await DoctorDB.findOne({ phoneNo });
-    if (CheckDoctor) {
-      return res.json({
-        success: false,
-        message: "Doctor already exists with the same phone no! Please try again",
-      });
-    }
+    // const CheckDoctor = await DoctorDB.findOne({ phoneNo });
+    // if (CheckDoctor) {
+    //   return res.json({
+    //     success: false,
+    //     message: "Doctor already exists with the same phone no! Please try again",
+    //   });
+    // }
 
-    const newDoctor = new DoctorDB({ name, email, phoneNo, address, totalCommission });
+    const newDoctor = new DoctorDB({ name, phoneNo, address, totalCommission });
     await newDoctor.save();
 
     res.status(200).json({
@@ -29,12 +29,12 @@ const AddDoctor = async (req, res) => {
 
 const UpdateDoctor = async (req, res) => {
   const { doctorId } = req.params;
-  const { name, email, phoneNo, address, totalCommission } = req.body;
+  const { name, phoneNo, address, totalCommission } = req.body;
 
   try {
     const updatedDoctor = await DoctorDB.findByIdAndUpdate(
       doctorId,
-      { name, email, phoneNo, address, totalCommission },
+      { name, phoneNo, address, totalCommission },
       { new: true } // Return the updated document
     );
 
