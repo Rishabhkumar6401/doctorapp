@@ -16,6 +16,7 @@ const AdminOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [editOrderData, setEditOrderData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [doctors, setDoctors] = useState([]);
   const { allOrders, loading: ordersLoading } = useSelector((state) => state.order);
 
@@ -112,10 +113,32 @@ const AdminOrdersPage = () => {
     }
   };
 
+
+
+  const filteredOrders = allOrders.filter((order) => {
+    const doctor = doctors.find((doctor) => doctor._id === order.referredBy);
+    return (
+      order.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (doctor && doctor.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      order.serialNo.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
   return (
     <div className="flex flex-col items-center p-4 space-y-8 mt-24">
       <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
         <h1 className="text-2xl font-bold mb-4">Patient Reports</h1>
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search by name, doctor, or serial no..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
 
         <table className="min-w-full border-collapse border border-gray-200">
           <thead>
@@ -128,7 +151,7 @@ const AdminOrdersPage = () => {
             </tr>
           </thead>
           <tbody>
-            {allOrders.map((order) => {
+            {filteredOrders.map((order) => {
               const doctor = doctors.find((doctor) => doctor._id === order.referredBy);
 
               return (
