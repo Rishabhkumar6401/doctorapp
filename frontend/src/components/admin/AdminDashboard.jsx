@@ -27,9 +27,7 @@ const AdminDashBoard = () => {
       <main className="flex-1 p-6 overflow-auto">
         <header className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
-          <button className="py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md">
-            Add New
-          </button>
+          
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
