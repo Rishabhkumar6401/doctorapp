@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
 const DoctorForm = () => {
+  const location = useLocation();
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phoneNo: '',
     address: '',
     totalCommission: 0,
   });
+
+  useEffect(() => {
+    if (location.state) {
+      setFormData(location.state);
+    }
+  }, [location.state]);
+
+  const doctorId = location.state?._id;
+
+
 
   const [message, setMessage] = useState('');
 
@@ -23,24 +34,33 @@ const DoctorForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/doctor/add', formData);
-      setMessage(response.data.message || 'Doctor added successfully!');
-      setFormData({
-        name: '',
-        email: '',
-        phoneNo: '',
-        address: '',
-        totalCommission: 0,
-      });
+      let response;
+      if (doctorId) {
+        // Update Doctor
+        response = await axios.put(`http://localhost:5000/api/doctor/${doctorId}`, formData);
+        setMessage(response.data.message || 'Doctor updated successfully!');
+      } else {
+        // Add New Doctor
+        response = await axios.post('http://localhost:5000/api/doctor/add', formData);
+        setMessage(response.data.message || 'Doctor added successfully!');
+        setFormData({
+          name: '',
+          phoneNo: '',
+          address: '',
+          totalCommission: 0,
+        });
+      }
+      // Navigate back after success
+      setTimeout(() => navigate('/admin/doctors'), 2000);
     } catch (error) {
       console.error(error);
-      setMessage('An error occurred while adding the doctor.');
+      setMessage('An error occurred while processing the request.');
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold mb-8 text-blue-600">Add Doctor</h1>
+      <h1 className="text-3xl font-bold mb-8 text-blue-600"> {doctorId ? 'Update Doctor' : 'Add Doctor'}</h1>
       <form
         onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md"
@@ -60,20 +80,7 @@ const DoctorForm = () => {
           />
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email:
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+       
 
         <div className="mb-4">
           <label htmlFor="phoneNo" className="block text-sm font-medium text-gray-700">
@@ -112,7 +119,7 @@ const DoctorForm = () => {
           type="submit"
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          Submit
+          {doctorId ? 'Update' : 'Submit'}
         </button>
       </form>
 

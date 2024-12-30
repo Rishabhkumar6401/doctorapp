@@ -5,17 +5,13 @@ const DoctorSchema = new mongoose.Schema(
             type:String,
             required:true
         },
-        email:{
-            type:String,
-            required:false,
-        },
-        phoneNo:{
+          phoneNo:{
             type:Number,
             required:true
         },
         address:{
             type:String,
-            required:true
+            required:false
         },
         totalCommission: {
             type: Number,

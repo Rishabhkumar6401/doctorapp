@@ -12,6 +12,8 @@ const SubCategoryForm = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [message, setMessage] = useState('');
   const [editingSubCategory, setEditingSubCategory] = useState(null);
+  const [filteredSubCategories, setFilteredSubCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -99,6 +101,18 @@ const SubCategoryForm = () => {
       referralFee: subCategory.referralFee,
     });
   };
+
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    const filtered = subCategories.filter(
+      (subCat) =>
+        subCat.name.toLowerCase().includes(query) ||
+        (subCat.category && subCat.category.toLowerCase().includes(query))
+    );
+    setFilteredSubCategories(filtered);
+  };
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
@@ -189,10 +203,21 @@ const SubCategoryForm = () => {
         <p className="mt-4 text-lg font-semibold text-green-600">{message}</p>
       )}
 
+
+<div className="mt-8 w-full max-w-2xl">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearch}
+          placeholder="Search by name or category"
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
       {/* SubCategory List */}
       <div className="mt-8 w-full max-w-2xl overflow-x-auto">
         <h2 className="text-2xl font-bold mb-6 text-gray-700">SubCategory List</h2>
-        {subCategories.length > 0 ? (
+        {filteredSubCategories.length > 0 ? (
           <table className="min-w-full bg-white shadow-lg rounded-lg">
             <thead>
               <tr className="bg-gray-200 text-gray-700">
@@ -204,7 +229,7 @@ const SubCategoryForm = () => {
               </tr>
             </thead>
             <tbody>
-              {subCategories.map((subCat) => (
+              {filteredSubCategories.map((subCat) => (
                 <tr key={subCat._id} className="border-t text-gray-700 hover:bg-gray-50">
                   <td className="px-6 py-4">{subCat.name}</td>
                   <td className="px-6 py-4">{subCat.category || 'N/A'}</td>
