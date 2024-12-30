@@ -32,7 +32,9 @@ const SubCategoryForm = () => {
   const fetchSubCategories = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/subcategories');
-      setSubCategories(response.data.Subcategories || []);
+      const subCategoriesData = response.data.Subcategories || [];
+      setSubCategories(subCategoriesData);
+      setFilteredSubCategories(subCategoriesData);
     } catch (error) {
       console.error('Error fetching subcategories:', error);
     }
