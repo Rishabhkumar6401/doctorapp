@@ -65,12 +65,13 @@ const PrintReport = () => {
   
       // Patient Details (Two-column Layout)
       const fields = [
-        { label: 'Patient Name', value: orderDetails.name },
-        { label: 'Patient Age', value: orderDetails.age },
-        { label: 'Patient Address', value: orderDetails.address },
-        { label: 'Patient Phone No', value: orderDetails.phoneNo },
+        { label: 'Name', value: orderDetails.name },
+        { label: 'Age', value: orderDetails.age },
+        { label: 'Address', value: orderDetails.address },
+        { label: 'Phone No', value: orderDetails.phoneNo },
         { label: 'Report Category', value: orderDetails.category },
         { label: 'Report SubCategory', value: subcategory.name },
+        { label: 'Referred By', value: doctorDetails.name },
         { label: 'Report Fee', value: orderDetails.fees },
         orderDetails.discount && { label: 'Discount', value: orderDetails.discount },
         { label: 'Final Payment', value: orderDetails.finalPayment },

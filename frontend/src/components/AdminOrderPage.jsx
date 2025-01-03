@@ -6,7 +6,7 @@ import Modal from "./model";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
-import { fetchAllOrders } from "../store/order";
+import { fetchAllOrders, updateOrder } from "../store/order";
 import { useDispatch, useSelector } from "react-redux";
 import ModalEditForm from "./ModalEditForm";
 import axios from "axios";
@@ -33,63 +33,49 @@ const AdminOrdersPage = () => {
 
     dispatch(fetchAllOrders());
     fetchDoctors();
-  }, []);
+  }, [dispatch]);
+
+  useEffect(() => {
+    console.log("Updated editOrderData", editOrderData); // This will log the updated data when it's changed
+  }, [editOrderData]); // Track when editOrderData changes
   
+
   const handleEditSubmit = async (formData) => {
     try {
       const orderId = editOrderData._id; // Get the current order ID
       const updatedData = formData; // The updated data from the form
   
-      // Make a PUT request to update the order
-      const response = await axios.put(`http://localhost:5000/api/orders/${orderId}`, updatedData);
-      
+      // Dispatch the updateOrder thunk to update the order in the server
+      const action = await dispatch(updateOrder({ orderId, updatedData }));
+  
       // Log the response for debugging
-      console.log('Order updated successfully', response.data);
-  
-      // After a successful update, fetch the updated list of orders
-      // This could be done by calling a function to re-fetch orders or by updating local state
-      dispatch(fetchAllOrders()); // Assuming you have a function `fetchOrders` to get the latest data
-  
-      // Close the modal after the update
-      setEditOrderData(null);
+      if (action.type === 'order/updateOrder/fulfilled') {
+        console.log('Order updated successfully', action.payload);
+
+        // Update local state to reflect the updated order
+        const updatedOrder = action.payload; // assuming the response contains the updated order
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === updatedOrder._id ? updatedOrder : order
+          )
+        );
+        
+        // Close the modal after the update
+        setEditOrderData(null);
+      }
     } catch (error) {
       // Handle any errors
       console.error('Error updating order', error);
     }
   };
-  
-  
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
   };
 
   const handleEditOrder = (order) => {
-    setEditOrderData(order);
-  };
-
-  const handleUpdateOrder = async (formData) => {
-    if (!editOrderData) return;
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/orders/${editOrderData._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editOrderData),
-      });
-
-      if (response.ok) {
-        alert("Order updated successfully!");
-        setEditOrderData(null);
-        dispatch(fetchAllOrders());
-      } else {
-        alert("Failed to update the order.");
-      }
-    } catch (error) {
-      console.error("Error updating the order:", error);
-    }
+    
+    setEditOrderData(order); // Open the modal with the selected order's data
   };
 
   const handleDeleteOrder = async (orderId) => {
@@ -112,8 +98,6 @@ const AdminOrdersPage = () => {
       }
     }
   };
-
-
 
   const filteredOrders = allOrders.filter((order) => {
     const doctor = doctors.find((doctor) => doctor._id === order.referredBy);
@@ -139,13 +123,12 @@ const AdminOrdersPage = () => {
           />
         </div>
 
-
         <table className="min-w-full border-collapse border border-gray-200">
           <thead>
             <tr>
               <th className="border border-gray-200 px-4 py-2 text-left">Serial No</th>
               <th className="border border-gray-200 px-4 py-2 text-left">Patient Name</th>
-              <th className="border border-gray-200 px-4 py-2 text-left">Date</th>
+              <th className="border border-gray-200 px-12 py-2 text-left">Date</th>
               <th className="border border-gray-200 px-4 py-2 text-left">Doctor Referral</th>
               <th className="border border-gray-200 px-4 py-2 text-left">Action</th>
             </tr>
@@ -187,9 +170,12 @@ const AdminOrdersPage = () => {
       )}
 
       {editOrderData && (
-        <ModalEditForm isOpen={true} onClose={() => setEditOrderData(null)}  onSubmit = {handleEditSubmit} initialData= {editOrderData}>
-          
-        </ModalEditForm>
+        <ModalEditForm 
+          isOpen={true} 
+          onClose={() => setEditOrderData(null)} 
+          onSubmit={handleEditSubmit} 
+          initialData={editOrderData}
+        />
       )}
     </div>
   );
