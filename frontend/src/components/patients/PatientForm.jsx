@@ -138,6 +138,7 @@ const PatientForm = () => {
    
   
     if (valueS) {
+      console.log(valueS)
       dispatch(fetchSubcategoryDetail(valueS));
     }
   }, [valueS]);
@@ -551,64 +552,68 @@ const PatientForm = () => {
           Subcategory
         </label>
         <Popover open={openS} onOpenChange={setOpenS} className="">
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={openS}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex justify-between items-center"
-        >
-          <span className="text-left">
-            {formData.subcategory
-              ? filteredSubcategories.find((subcategory) => subcategory._id === formData.subcategory)?.name
-              : "Select Subcategory..."}
-          </span>
-          <ChevronsUpDown className="opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500  w-5 h-5" />
-            <input
-              type="text"
-              placeholder=" Search subcategory..."
-              value={searchTermS}
-              onChange={(e) => setSearchTermS(e.target.value)}
-              className="h-9 w-full px-10 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
-            />
-          </div>
-          <CommandList>
-            {filteredSubcategoriesNew.length === 0 ? (
-              <CommandEmpty>No subcategory found.</CommandEmpty>
-            ) : (
-              <CommandGroup>
-                {filteredSubcategoriesNew.map((subcategory) => (
-                  <CommandItem
-                    key={subcategory._id}
-                    value={subcategory._id}
-                    onSelect={(currentValue) => {
-                      setValueS(currentValue === valueS ? "" : currentValue); 
-                      handleInputChange({
-                        target: { name: "subcategory", value: currentValue },
-                      });
-                      setOpenS(false);
-                    }}
-                  >
-                    {subcategory.name}
-                    <Check
-                      className={`ml-auto ${
-                        valueS === subcategory._id ? "opacity-100" : "opacity-0"
-                      }`}
-                    />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+  <PopoverTrigger asChild>
+    <Button
+      variant="outline"
+      role="combobox"
+      aria-expanded={openS}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex justify-between items-center"
+    >
+      <span className="text-left">
+        {formData.subcategory
+          ? filteredSubcategories.find(
+              (subcategory) => subcategory.name === formData.subcategory
+            )?.name
+          : "Select Subcategory..."}
+      </span>
+      <ChevronsUpDown className="opacity-50" />
+    </Button>
+  </PopoverTrigger>
+  <PopoverContent className="w-full p-0">
+    <Command>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+        <input
+          type="text"
+          placeholder="Search subcategory..."
+          value={searchTermS}
+          onChange={(e) => setSearchTermS(e.target.value)}
+          className="h-9 w-full px-10 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
+        />
+      </div>
+      <CommandList>
+        {filteredSubcategoriesNew.length === 0 ? (
+          <CommandEmpty>No subcategory found.</CommandEmpty>
+        ) : (
+          <CommandGroup>
+  {filteredSubcategoriesNew.map((subcategory) => (
+    <CommandItem
+      key={subcategory.name} // Use name as the key
+      value={subcategory.name} // Display the subcategory name
+      onSelect={(currentValue) => {
+        setValueS(subcategory._id); // Set the value as subcategory._id
+        handleInputChange({
+          target: { name: "subcategory", value: subcategory.name }, // Save subcategory name in form data
+        });
+        setOpenS(false);
+      }}
+    >
+      {subcategory.name}
+      <Check
+        className={`ml-auto ${
+          valueS === subcategory._id ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    </CommandItem>
+  ))}
+</CommandGroup>
+
+        )}
+      </CommandList>
+    </Command>
+  </PopoverContent>
+</Popover>
+
       </div>
             <div>
               <label htmlFor="fees" className="block text-sm font-medium text-gray-700">

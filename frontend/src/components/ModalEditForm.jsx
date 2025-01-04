@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchDoctors } from "../store/doctor";
 import { fetchCategories } from '../store/categories';
 import {  fetchSubcategoryDetail } from '../store/subcategories';
+
 import axios from 'axios';
 
 const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const dispatch = useDispatch();
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+  const [valueS, setValueS] = useState("");
 
   // Redux state
   const { doctors } = useSelector((state) => state.doctors);
@@ -82,6 +84,8 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
         // Update finalPayment after validation
         updatedFormData.finalPayment = fees - discount;
       }
+
+      
   
       return updatedFormData;
     });
@@ -110,12 +114,13 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   }, [formData.category]);
 
   useEffect(() => {
+    console.log(valueS)
      
     
-      if (formData.subcategory) {
-        dispatch(fetchSubcategoryDetail(formData.subcategory));
+      if (valueS) {
+        dispatch(fetchSubcategoryDetail(valueS));
       }
-    }, [formData.subcategory]);
+    }, [valueS]);
 
      useEffect(() => {
         if (subcategory) {
@@ -256,25 +261,26 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   
             {/* Subcategory (Select Dropdown) */}
           {/* Subcategory (Select Dropdown) */}
-<div>
+          <div>
   <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700">
     Subcategory
   </label>
   <select
     id="subcategory"
     name="subcategory"
-    value={formData.subcategory || ""} // Ensure formData.subcategory is used for the value
+    value={formData.subcategory} // Bind value to the formData.subcategory state
     onChange={handleChange}
     className="mt-2 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2 text-sm"
   >
     <option value="">Select Subcategory</option>
     {filteredSubcategories?.map((sub) => (
-      <option key={sub._id} value={sub._id} selected={formData.subcategory === sub._id}>
+      <option key={sub._id} value={sub.name}>
         {sub.name}
       </option>
     ))}
   </select>
 </div>
+
 
   
             {/* Fees */}

@@ -33,10 +33,8 @@ const OrderSchema = new mongoose.Schema(
 
         },
         subcategory:{
-            type: mongoose.Schema.Types.ObjectId, // Reference to DoctorDB
-            ref: "subcategories", // Target collection
-            required: true  
-
+            type : String,
+            required : true 
         },
         fees:{
             type : Number,

@@ -22,7 +22,6 @@ const PrintReport = () => {
     if (!orderDetails || !orderDetails.referredBy || !orderDetails.subcategory) return;
 
     dispatch(fetchDoctorById(orderDetails.referredBy));
-    dispatch(fetchSubcategoryDetail(orderDetails.subcategory));
   }, [dispatch, orderDetails]);
 
   const generatePdf = async () => {
@@ -70,7 +69,7 @@ const PrintReport = () => {
         { label: 'Address', value: orderDetails.address },
         { label: 'Phone No', value: orderDetails.phoneNo },
         { label: 'Report Category', value: orderDetails.category },
-        { label: 'Report SubCategory', value: subcategory.name },
+        { label: 'Report SubCategory', value: orderDetails.subcategory },
         { label: 'Referred By', value: doctorDetails.name },
         { label: 'Report Fee', value: orderDetails.fees },
         orderDetails.discount > 0 && { label: 'Discount', value: orderDetails.discount },
@@ -200,7 +199,7 @@ const PrintReport = () => {
   
   
 
-  if (!orderDetails || !subcategory) {
+  if (!orderDetails ) {
     return <div className="text-center text-xl mt-40">  <p className="text-red-600 text-lg font-medium">
     Some error occurred. Please fill the form again.
   </p>
@@ -231,7 +230,7 @@ const PrintReport = () => {
 
         <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
           <p><strong className="text-gray-700">Report Category:</strong> {orderDetails.category}</p>
-          <p><strong className="text-gray-700">Report SubCategory:</strong> {subcategory.name}</p>
+          <p><strong className="text-gray-700">Report SubCategory:</strong> {orderDetails.subcategory}</p>
           <p><strong className="text-gray-700">Report Fee:</strong> {orderDetails.fees}</p>
       {orderDetails.discount && orderDetails.discount > 0 && (
   <p>

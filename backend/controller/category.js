@@ -135,10 +135,28 @@ const getAllCategory = async (req, res) => {
   }
 };
 
+const fetchAllCategoriesFromDB = async () => {
+  try {
+    // Fetch all categories from the database
+    const categories = await Category.find();
+
+    if (categories.length === 0) {
+      throw new Error("No categories found");
+    }
+
+    return categories;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    throw error; // Propagate error to the caller
+  }
+};
+
+
 module.exports = {
   AddCategory,
   UpdateCategory,
   getCategoryById,
   getAllCategory,
   DeleteCategory,
+  fetchAllCategoriesFromDB,
 };

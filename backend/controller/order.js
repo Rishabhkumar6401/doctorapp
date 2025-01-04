@@ -173,7 +173,23 @@ const DeleteOrder = async (req, res) => {
   }
 };
 
+const fetchAllOrdersFromDB = async () => {
+  try {
+    // Fetch all orders from the database
+    const orders = await Order.find();
+
+    if (orders.length === 0) {
+      throw new Error('No orders found');
+    }
+
+    return orders;
+  } catch (error) {
+    console.error('Error fetching all orders:', error);
+    throw error; // Propagate the error to the caller
+  }
+};
 
 
 
-module.exports = { PlaceOrder, fetchOrder, fetchAllOrder, EditOrder, DeleteOrder};
+
+module.exports = { PlaceOrder, fetchOrder, fetchAllOrder, EditOrder, DeleteOrder, fetchAllOrdersFromDB};
