@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import AdminLogin from './components/admin/AdminLogin';
 import AdminNavbar from './components/AdminNavbar';
 import AdminOrdersPage from './components/AdminOrderPage';
+import MonthyReport from './components/MonthyReport';
 
 function App() {
   const dispatch = useDispatch();
@@ -51,6 +52,7 @@ function App() {
               <Route path="doctor" element={<Doctor />} />
               <Route path="addDoctor" element={<DoctorForm />} />
               <Route path="doctorReport" element={<DoctorReport />} />
+              <Route path="monthlyReport" element={<MonthyReport />} />
               <Route path="category" element={<Category />} />
               <Route path="addCategory" element={<CategoryForm />} />
               <Route path="addSubcategory" element={<SubCategoryForm />} />

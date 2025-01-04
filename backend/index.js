@@ -9,6 +9,7 @@ const subCategoryRouter = require("./routes/subCategory-router")
 const OrderRouter = require("./routes/order-router")
 const AdminRouter = require("./routes/admin-router")
 const checkAuthRouter = require("./routes/checkAuth-router")
+const cron = require("node-cron");
 const app = express()
 const Port = 5000;
 mongoose
@@ -31,6 +32,18 @@ app.use("/api/",subCategoryRouter );
 app.use("/api/",OrderRouter );
 app.use("/api/",checkAuthRouter);
 app.use("/admin/api/", AdminRouter );
+
+// Cron Job to Reset `totalMontly`
+cron.schedule("0 0 1 * *", async () => {
+  try {
+    console.log("Running Cron Job: Resetting totalMontly for all doctors...");
+    const result = await DoctorDB.updateMany({}, { totalMontly: 0 });
+    console.log(`Cron Job Completed: ${result.modifiedCount} documents updated.`);
+  } catch (error) {
+    console.error("Error during Cron Job:", error);
+  }
+});
+
 
 
 app.listen(Port, ()=>

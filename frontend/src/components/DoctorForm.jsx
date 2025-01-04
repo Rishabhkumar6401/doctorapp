@@ -8,7 +8,6 @@ const DoctorForm = () => {
     name: '',
     phoneNo: '',
     address: '',
-    totalCommission: 0,
   });
 
   useEffect(() => {
@@ -47,7 +46,6 @@ const DoctorForm = () => {
           name: '',
           phoneNo: '',
           address: '',
-          totalCommission: 0,
         });
       }
       // Navigate back after success

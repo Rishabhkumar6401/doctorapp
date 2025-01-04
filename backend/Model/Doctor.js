@@ -13,10 +13,15 @@ const DoctorSchema = new mongoose.Schema(
             type:String,
             required:false
         },
+        totalMontly:{
+            type: Number,
+            required: false,
+            default: 0, 
+        },
         totalCommission: {
             type: Number,
             required: false,
-            default: 0, // Set default value to 0
+            default: 0, 
         }
         
     },

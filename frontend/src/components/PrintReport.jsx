@@ -73,7 +73,7 @@ const PrintReport = () => {
         { label: 'Report SubCategory', value: subcategory.name },
         { label: 'Referred By', value: doctorDetails.name },
         { label: 'Report Fee', value: orderDetails.fees },
-        orderDetails.discount && { label: 'Discount', value: orderDetails.discount },
+        orderDetails.discount > 0 && { label: 'Discount', value: orderDetails.discount },
         { label: 'Final Payment', value: orderDetails.finalPayment },
         { label: 'Payment Mode', value: orderDetails.paymentMode },
       ].filter(Boolean);
@@ -233,7 +233,12 @@ const PrintReport = () => {
           <p><strong className="text-gray-700">Report Category:</strong> {orderDetails.category}</p>
           <p><strong className="text-gray-700">Report SubCategory:</strong> {subcategory.name}</p>
           <p><strong className="text-gray-700">Report Fee:</strong> {orderDetails.fees}</p>
-          {orderDetails.discount && <p><strong className="text-gray-700">Discount:</strong> {orderDetails.discount}</p>}
+      {orderDetails.discount && orderDetails.discount > 0 && (
+  <p>
+    <strong className="text-gray-700">Discount:</strong> {orderDetails.discount}
+  </p>
+)}
+
           <p><strong className="text-gray-700">Final Payment:</strong> {orderDetails.finalPayment}</p>
           <p><strong className="text-gray-700">Payment Mode:</strong> {orderDetails.paymentMode}</p>
         </div>
