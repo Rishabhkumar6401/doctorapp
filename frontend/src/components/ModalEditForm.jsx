@@ -35,6 +35,7 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   // Initialize form data if editing existing data
   useEffect(() => {
     if (initialData) {
+      console.log("Initial Data received in Modal:", initialData.fees);
       setFormData({
         phoneNo: initialData.phoneNo || "",
         name: initialData.name || "",
@@ -50,6 +51,7 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       });
     }
   }, [initialData]);
+  
 
   // Fetch data on mount or when modal opens
   useEffect(() => {
@@ -61,7 +63,7 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
   // Handle input change
   // Handle input change
-const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
   
     // Update formData with the changed value
@@ -71,16 +73,20 @@ const handleChange = (e) => {
         [name]: value,
       };
   
-      // If the discount changes, recalculate finalPayment
-      if (name === "discount") {
-        const discount = parseFloat(value) || 0;
-        const fees = parseFloat(updatedFormData.fees) || 0;
+      // If fees or discount change, recalculate finalPayment
+      if (name === "fees" || name === "discount") {
+        let fees = name === "fees" ? parseFloat(value) || 0 : parseFloat(updatedFormData.fees) || 0;
+        let discount = name === "discount" ? parseInt(value) || 0 : parseInt(updatedFormData.discount) || 0;
+
+  
+        // Update finalPayment after validation
         updatedFormData.finalPayment = fees - discount;
       }
   
       return updatedFormData;
     });
   };
+  
   
 
   useEffect(() => {
@@ -314,6 +320,7 @@ const handleChange = (e) => {
     value={formData.finalPayment}
     onChange={handleChange} // You might want to prevent manual edits here
     className="mt-2 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2 text-sm"
+    readOnly
     
   />
 </div>

@@ -29,6 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import AddDoctorModal from "./AddDoctor";
 
 const PatientForm = () => {
     const dispatch = useDispatch();
@@ -45,6 +46,8 @@ const PatientForm = () => {
   const [searchTermC, setSearchTermC] = useState("");
  
     const [openC, setOpenC] = React.useState(false)
+    const [isAddDoctorModalOpen, setIsAddDoctorModalOpen] = useState(false);
+    
   const [valueC, setValueC] = React.useState("")
  
     const [openS, setOpenS] = React.useState(false)
@@ -89,6 +92,14 @@ const PatientForm = () => {
    
     
   }, []);
+  const handleOpenModal = () => {
+    setIsAddDoctorModalOpen(true);
+  };
+
+  // Close the modal
+  const handleCloseModal = () => {
+    setIsAddDoctorModalOpen(false);
+  };
   useEffect(() => {
    
     console.log(isNewEntry )
@@ -149,21 +160,33 @@ const PatientForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+  
     setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
-
+  
+    // Handle fees and discount calculation
     if (name === "fees" || name === "discount") {
-      const fees = name === "fees" ? parseFloat(value) || 0 : parseFloat(formData.fees) || 0;
-      const discount = name === "discount" ? parseFloat(value) || 0 : parseFloat(formData.discount) || 0;
-      const final = fees -  discount;
+      let fees = name === "fees" ? parseFloat(value) || 0 : parseFloat(formData.fees) || 0;
+      let discount = name === "discount" ? parseInt(value) || 0 : parseInt(formData.discount) || "";
+  
+      // Check if discount is greater than referralFee
+      if (name === "discount" && discount > parseInt(formData.referralFee)) {
+        // You can either show an alert or adjust the discount
+        alert("Discount Value is too Big");
+        discount = "" ; // Set discount to referralFee if it's too large
+      }
+  
+      const final = fees - discount;
       setFormData((prev) => ({
         ...prev,
-        finalPayment: final.toFixed(2)
+        finalPayment: final, // Remove decimals here as well
+        discount: discount // Ensure discount is updated without decimals
       }));
     }
-
+  
+    // Check phone number length for existing patient check
     if (name === "phoneNo" && value.length === 10) {
       dispatch(checkPatientByPhone(value)).then((action) => {
         if (action.payload.isNew === false) {
@@ -174,6 +197,7 @@ const PatientForm = () => {
       });
     }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -411,6 +435,17 @@ const PatientForm = () => {
         >
           None
         </CommandItem>
+        <CommandItem
+  value="addNew"
+  onSelect={() => {
+    handleOpenModal(); // Open the modal to add a new doctor
+    setOpen(false); // Close the popover
+  }}
+  className="text-green-700 hover:text-blue-600 focus:text-blue-600"
+>
+  Add New Doctor
+</CommandItem>
+
         {filteredDoctors.length === 0 ? (
           <CommandEmpty>No doctor found.</CommandEmpty>
         ) : (
@@ -606,6 +641,7 @@ const PatientForm = () => {
                 onChange={handleInputChange}
                 placeholder="Enter Discount"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min="0"
                
               />
             </div>
@@ -653,6 +689,8 @@ const PatientForm = () => {
           </button>
         </form>
       </div>
+
+      <AddDoctorModal isOpen={isAddDoctorModalOpen} onClose={handleCloseModal} />
   
      
     </div>

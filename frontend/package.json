@@ -26,6 +26,7 @@
     "date-fns": "^3.6.0",
     "html2pdf.js": "^0.10.2",
     "jspdf": "^2.5.2",
+    "lucide": "^0.469.0",
     "lucide-react": "^0.468.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^3.11.174",

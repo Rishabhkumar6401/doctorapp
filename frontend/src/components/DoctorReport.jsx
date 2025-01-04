@@ -140,7 +140,7 @@ const DoctorReport = () => {
                 <tr>
                   <th className="border border-gray-200 px-4 py-2 text-left">Serial No</th>
                   <th className="border border-gray-200 px-4 py-2 text-left">Patient Name</th>
-                  <th className="border border-gray-200 px-4 py-2 text-left">Date</th>
+                  <th className="border border-gray-200 px-12 py-2 text-left">Date</th>
                   <th className="border border-gray-200 px-4 py-2 text-left">Price</th>
                   <th className="border border-gray-200 px-4 py-2 text-left">Discount</th>
                   <th className="border border-gray-200 px-4 py-2 text-left">Final Payment</th>
