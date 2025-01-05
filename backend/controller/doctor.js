@@ -144,6 +144,20 @@ const GetDoctorById = async (req, res) => {
       });
     }
   };
+
+  const fetchAllDoctorsFromDB = async () => {
+  try {
+    const doctors = await DoctorDB.find();
+    if (!doctors || doctors.length === 0) {
+      throw new Error("No doctors found");
+    }
+    // console.log("Fetched all doctors from DB:", doctors);
+    return doctors;
+  } catch (error) {
+    console.error("Error fetching doctors:", error.message);
+    throw error;
+  }
+};
   
   
 
@@ -152,5 +166,6 @@ module.exports = {
   UpdateDoctor,
   DeleteDoctor,
   GetDoctorById,
-  GetAllDoctors
+  GetAllDoctors,
+  fetchAllDoctorsFromDB
 };

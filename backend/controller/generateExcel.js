@@ -1,39 +1,54 @@
 const XLSX = require("xlsx");
 const nodemailer = require("nodemailer");
 const { fetchAllOrdersFromDB } = require("./order"); // Adjust path
-const { fetchAllCategoriesFromDB } = require("./category"); // Adjust path
+const { fetchAllDoctorsFromDB } = require("./doctor"); // Adjust path
 
 const generateExcelReport = async () => {
   try {
     const orders = await fetchAllOrdersFromDB();
-    const categories = await fetchAllCategoriesFromDB();
+    const doctors = await fetchAllDoctorsFromDB(); // Fetch all doctors
 
-    // Generate and save the Excel report
+    // Group orders by doctor and calculate total commission
+    const doctorCommissions = {};
+
+    orders.forEach((order) => {
+      // Exclude orders with invalid or missing referredBy field
+      if (!order.referredBy || order.referredBy === 0) return;
+
+      const doctor = doctors.find((doc) => doc._id.toString() === order.referredBy);
+
+      if (!doctor) return; // Skip if doctor not found
+
+      if (!doctorCommissions[doctor._id]) {
+        doctorCommissions[doctor._id] = {
+          doctorName: doctor.name,
+          totalCommission: 0,
+        };
+      }
+
+      const commission = (order.referralFee || 0) - (order.discount || 0);
+      doctorCommissions[doctor._id].totalCommission += commission;
+    });
+
+    // Prepare data for Excel
     const excelData = [];
     let serialNo = 1;
 
-    orders.forEach((order) => {
-      const category = categories.find((cat) => cat.name === order.subcategory.name);
-
+    for (const doctorId in doctorCommissions) {
+      const doctorData = doctorCommissions[doctorId];
       excelData.push({
         "Serial No": serialNo++,
-        "Doctor Name": order.referredBy || "Unknown",
-        "Doctor Mobile": order.referredByPhone || "N/A",
-        "Doctor Address": order.referredByAddress || "N/A",
-        Category: category?.name || "N/A",
-        Subcategory: order.subcategory.name,
-        Discount: order.discount || 0,
-        "Final Payment": order.finalPayment || 0,
-        "Referral Fee": order.referralFee || 0,
-        "Total Commission": order.referralFee - order.discount || 0,
+        "Doctor Name": doctorData.doctorName,
+        "Overall Total Commission": doctorData.totalCommission.toFixed(2),
       });
-    });
+    }
 
+    // Generate Excel
     const ws = XLSX.utils.json_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Monthly Report");
+    XLSX.utils.book_append_sheet(wb, ws, "Doctor Commissions Report");
 
-    const filePath = "./Monthly_Report.xlsx";
+    const filePath = "./Doctor_Commissions_Report.xlsx";
     XLSX.writeFile(wb, filePath);
 
     console.log("Excel Report Generated:", filePath);
@@ -61,11 +76,11 @@ const sendEmailWithAttachment = async (filePath) => {
     const mailOptions = {
       from: "rishabh6401@gmail.com", // Sender address
       to: "gozoomtechnologies@gmail.com", // Recipient email
-      subject: "Monthly Excel Report",
-      text: "Please find the attached Monthly Report.",
+      subject: "Doctor Commissions Report",
+      text: "Please find the attached Doctor Commissions Report.",
       attachments: [
         {
-          filename: "Monthly_Report.xlsx",
+          filename: "Doctor_Commissions_Report.xlsx",
           path: filePath,
         },
       ],

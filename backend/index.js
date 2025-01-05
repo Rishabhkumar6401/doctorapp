@@ -47,6 +47,22 @@ app.use("/api/reports", reportRouter); // Route for generating reports
 
 
 // Scheduled Job to Generate Excel Report on the Last Day of Each Month at 11 PM
+// nodeSchedule.scheduleJob("0 23 28-31 * *", async () => {
+//   const now = new Date();
+//   const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+//   if (now.getDate() === lastDayOfMonth) {
+//     try {
+//       console.log("Generating Excel Report...");
+//       const filePath = await generateExcelReport();
+//       console.log("Excel Report Generated:", filePath);
+//     } catch (error) {
+//       console.error("Error during Excel Report Generation:", error);
+//     }
+//   }
+// });
+
+
 
 nodeSchedule.scheduleJob(new Date(Date.now() + 1 * 60 * 1000), async () => {
   try {
@@ -57,7 +73,6 @@ nodeSchedule.scheduleJob(new Date(Date.now() + 1 * 60 * 1000), async () => {
     console.error("Error during Excel Report Generation:", error);
   }
 });
-
 
 // Start the Server
 app.listen(PORT, () => {
