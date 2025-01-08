@@ -173,50 +173,50 @@ const DeleteOrder = async (req, res) => {
   }
 };
 
-// const fetchAllOrdersFromDB = async () => {
-//   try {
-//     // Get the start and end timestamps for the current month
-//     const now = new Date();
-//     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0); // 1st day of the month at 00:00:00
-//     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 22, 55, 0); // Last day of the month at 22:55:00
-
-//     // Fetch all orders within the date range
-//     const orders = await Order.find({
-//       createdAt: { $gte: startOfMonth, $lte: endOfMonth },
-//     });
-
-//     if (orders.length === 0) {
-//       throw new Error("No orders found for the current month");
-//     }
-
-//     return orders;
-//   } catch (error) {
-//     console.error("Error fetching all orders:", error);
-//     throw error; // Propagate the error to the caller
-//   }
-// };
-
 const fetchAllOrdersFromDB = async () => {
   try {
-    // Get the current timestamp and the timestamp for 15 minutes ago
+    // Get the start and end timestamps for the current month
     const now = new Date();
-    const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000); // 15 minutes in milliseconds
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0); // 1st day of the month at 00:00:00
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 50, 0); // Last day of the month at 23:50:00
 
-    // Fetch all orders created in the last 15 minutes
+    // Fetch all orders within the date range
     const orders = await Order.find({
-      createdAt: { $gte: fifteenMinutesAgo, $lte: now },
+      createdAt: { $gte: startOfMonth, $lte: endOfMonth },
     });
 
     if (orders.length === 0) {
-      throw new Error("No orders found in the last 15 minutes");
+      throw new Error("No orders found for the current month");
     }
 
     return orders;
   } catch (error) {
-    console.error("Error fetching orders created in the last 15 minutes:", error);
+    console.error("Error fetching all orders:", error);
     throw error; // Propagate the error to the caller
   }
 };
+
+// const fetchAllOrdersFromDB = async () => {
+//   try {
+//     // Get the current timestamp and the timestamp for 15 minutes ago
+//     const now = new Date();
+//     const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000); // 15 minutes in milliseconds
+
+//     // Fetch all orders created in the last 15 minutes
+//     const orders = await Order.find({
+//       createdAt: { $gte: fifteenMinutesAgo, $lte: now },
+//     });
+
+//     if (orders.length === 0) {
+//       throw new Error("No orders found in the last 15 minutes");
+//     }
+
+//     return orders;
+//   } catch (error) {
+//     console.error("Error fetching orders created in the last 15 minutes:", error);
+//     throw error; // Propagate the error to the caller
+//   }
+// };
 
 
 

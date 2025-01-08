@@ -46,8 +46,8 @@ app.use("/admin/api/", adminRouter);
 app.use("/api/reports", reportRouter); // Route for generating reports
 
 
-// Scheduled Job to Generate Excel Report on the Last Day of Each Month at 11 PM
-nodeSchedule.scheduleJob("0 23 28-31 * *", async () => {
+// Scheduled Job to Generate Excel Report on the Last Day of Each Month at 11:55 PM
+nodeSchedule.scheduleJob("55 23 28-31 * *", async () => {
   const now = new Date();
   const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
@@ -61,6 +61,7 @@ nodeSchedule.scheduleJob("0 23 28-31 * *", async () => {
     }
   }
 });
+
 
 
 
