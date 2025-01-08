@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllOrders, fetchOrdersByDate } from "../store/order"; // import fetchOrdersByDate
 import { fetchCategories } from "../store/categories";
-import { DateRange } from "react-date-range"; // Import date-range picker
+import { DateRangePicker } from "react-date-range";// Import date-range picker
 import * as XLSX from "xlsx"; // Import xlsx library
 import "react-date-range/dist/styles.css"; // Import default styles
 import "react-date-range/dist/theme/default.css"; // Import theme styles
@@ -242,101 +242,111 @@ const [message, setMessage] = useState("");   // Store message
 
   return (
     <div className="p-6 mt-16">
-      <div className="mb-4 flex items-center space-x-4">
-      <div className="flex flex-col w-72 space-y-1.5">
-  <Label htmlFor="doctor" className="text-lg font-semibold text-gray-700">
-    Select Doctor
-  </Label>
-  <Select
-    onValueChange={setSelectedDoctor}
-    className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <div className="mb-6 flex flex-wrap space-x-6 items-start">
+  {/* Doctor Select Section */}
+  <div className="flex flex-col w-72 space-y-2">
+    <Label htmlFor="doctor" className="text-lg font-semibold text-gray-700">
+      Select Doctor
+    </Label>
+    <Select
+      onValueChange={setSelectedDoctor}
+      className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <SelectTrigger id="doctor">
+        <SelectValue placeholder="Select a doctor" />
+      </SelectTrigger>
+      <SelectContent className="bg-white border border-gray-300 shadow-md rounded-lg max-h-60">
+        <div className="sticky top-0 bg-white p-2 border-b border-gray-300">
+          <Input
+            type="text"
+            placeholder="Search doctor"
+            value={searchQueryDoc}
+            onChange={(e) => setSearchQueryDoc(e.target.value)}
+            className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="max-h-48 overflow-auto">
+          <SelectItem value="0">All</SelectItem>
+          {filteredDoctors.map((doctor) => (
+            <SelectItem key={doctor._id} value={doctor._id}>
+              {doctor.name}
+            </SelectItem>
+          ))}
+        </div>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Date Picker Section */}
+  <div className="flex items-center space-x-4 mt-8">
+  <button
+    onClick={() => setShowDatePicker(!showDatePicker)}
+    className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
   >
-    <SelectTrigger id="doctor">
-      <SelectValue placeholder="Select a doctor" />
-    </SelectTrigger>
-    <SelectContent className="bg-white border border-gray-300 shadow-md rounded-lg max-h-60">
-      <div className="sticky top-0 bg-white p-2 border-b border-gray-300">
-        <Input
-          type="text"
-          placeholder="Search doctor"
-          value={searchQueryDoc}
-          onChange={(e) => setSearchQueryDoc(e.target.value)}
-          className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    {showDatePicker ? "Hide Date Picker" : "Show Date Picker"}
+  </button>
+
+  {/* Date Range Picker */}
+  {showDatePicker && (
+    <div className="ml-4 bg-white border border-gray-300 shadow-md rounded-lg p-4 w-[600px]">
+      <DateRangePicker
+        editableDateInputs={true}
+        onChange={(item) => setDateRange([item.selection])}
+        moveRangeOnFirstSelection={false}
+        ranges={dateRange}
+        className="text-sm"
+      />
+      <div className="mt-4 flex space-x-4 justify-end">
+        <button
+          onClick={applyDateFilter}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
+        >
+          Apply Date Filter
+        </button>
+        <button
+          onClick={resetDateFilter}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 transition"
+        >
+          Remove Date Filter
+        </button>
       </div>
-      <div className="max-h-48 overflow-auto">
-        <SelectItem value="0">All</SelectItem>
-        {filteredDoctors.map((doctor) => (
-          <SelectItem key={doctor._id} value={doctor._id}>
-            {doctor.name}
-          </SelectItem>
-        ))}
-      </div>
-    </SelectContent>
-  </Select>
+    </div>
+  )}
 </div>
 
+</div>
 
-        <button
-          onClick={() => setShowDatePicker(!showDatePicker)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
-        >
-          {showDatePicker ? "Hide Date Picker" : "Show Date Picker"}
-        </button>
+<div className="flex justify-end items-center space-x-4 mb-4">
+  {/* Search Bar */}
+  <input
+    type="text"
+    placeholder="Search"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    className="p-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 text-sm"
+  />
 
-        {showDatePicker && (
-          <div className="ml-4 bg-white border border-gray-300 shadow-md rounded-lg p-4">
-            <DateRange
-              editableDateInputs={true}
-              onChange={(item) => setDateRange([item.selection])}
-              moveRangeOnFirstSelection={false}
-              ranges={dateRange}
-              className="text-sm"
-            />
-            <div className="mt-4 flex space-x-2">
-              <button
-                onClick={applyDateFilter}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
-              >
-                Apply Date Filter
-              </button>
-              <button
-                onClick={resetDateFilter}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 transition"
-              >
-                Remove Date Filter
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+  {/* Download Report Buttons */}
+  <div className="flex items-center space-x-4">
+    <button
+      onClick={downloadExcel}
+      className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
+    >
+      Download Report
+    </button>
 
-      <input
-        type="text"
-        placeholder="Search"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="mb-4 p-3 border border-gray-300 rounded-lg w-full max-w-xs"
-      />
+    <button
+      onClick={downloadDetailedExcel}
+      className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
+    >
+      Download Detailed Report
+    </button>
+  </div>
+</div>
 
-      <div className="mb-4 flex justify-end">
-        <button
-          onClick={downloadExcel}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
-        >
-          Download Report
-        </button>
+{/* Message Display */}
+{message && <p className="mt-4 text-center text-green-600">{message}</p>}
 
-        {/* New button for downloading detailed Excel */}
-        <button
-          onClick={downloadDetailedExcel}
-          className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
-        >
-          Download Detailed Report
-        </button>
-      </div>
-
-    {message && <p>{message}</p>}
       <table className="w-full border-collapse border border-gray-300 shadow-md">
         {/* Display message if no records found */}
         <thead>
