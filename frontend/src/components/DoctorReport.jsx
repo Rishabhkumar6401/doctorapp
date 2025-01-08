@@ -133,13 +133,15 @@ const DoctorReport = () => {
 
       {showTable && (
         <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Patient Report</h2>
-          {patients.length > 0 ? (
-            <table className="min-w-full border-collapse border border-gray-200">
+        <h2 className="text-xl font-bold mb-4">Patient Report</h2>
+        {patients.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-full border-collapse border border-gray-200">
               <thead>
                 <tr>
                   <th className="border border-gray-200 px-4 py-2 text-left">Serial No</th>
                   <th className="border border-gray-200 px-4 py-2 text-left">Patient Name</th>
+                  <th className="border border-gray-200 px-4 py-2 text-left">SubCategory</th>
                   <th className="border border-gray-200 px-12 py-2 text-left">Date</th>
                   <th className="border border-gray-200 px-4 py-2 text-left">Price</th>
                   <th className="border border-gray-200 px-4 py-2 text-left">Discount</th>
@@ -159,6 +161,7 @@ const DoctorReport = () => {
                     <tr key={patient._id}>
                       <td className="border border-gray-200 px-4 py-2">{patient.serialNo}</td>
                       <td className="border border-gray-200 px-4 py-2">{patient.name}</td>
+                      <td className="border border-gray-200 px-4 py-2">{patient.subcategory}</td>
                       <td className="border border-gray-200 px-4 py-2">
                         {format(new Date(patient.createdAt), "yyyy-MM-dd")}
                       </td>
@@ -182,7 +185,10 @@ const DoctorReport = () => {
               {selectedDoctor !== "0" && (
                 <tfoot>
                   <tr>
-                    <td colSpan="7" className="border border-gray-200 px-4 py-2 font-bold text-right">
+                    <td
+                      colSpan="8"
+                      className="border border-gray-200 px-4 py-2 font-bold text-right"
+                    >
                       Total Commission Earned:
                     </td>
                     <td className="border border-gray-200 px-4 py-2 font-bold">
@@ -192,15 +198,17 @@ const DoctorReport = () => {
                 </tfoot>
               )}
             </table>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center bg-gray-50 p-6 rounded-lg">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">No Results Found</h3>
-              <p className="text-gray-600">
-                We couldn't find any records matching the selected criteria. Please try again with different filters.
-              </p>
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center bg-gray-50 p-6 rounded-lg">
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">No Results Found</h3>
+            <p className="text-gray-600">
+              We couldn't find any records matching the selected criteria. Please try again with different filters.
+            </p>
+          </div>
+        )}
+      </div>
+      
       )}
     </div>
   );

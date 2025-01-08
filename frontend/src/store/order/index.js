@@ -30,6 +30,22 @@ export const fetchAllOrders = createAsyncThunk(
   }
 );
 
+// Thunk to fetch orders by date range
+export const fetchOrdersByDate = createAsyncThunk(
+  'order/fetchOrdersByDate',
+  async ({ startDate, endDate }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/ordersbydate?startDate=${startDate}&endDate=${endDate}`
+      );
+      return response.data.orders; // Assuming the response contains the array of filtered orders
+    } catch (error) {
+      console.error('Error fetching orders by date:', error);
+      return rejectWithValue('Failed to fetch orders by date');
+    }
+  }
+);
+
 // Thunk to update an existing order
 export const updateOrder = createAsyncThunk(
   'order/updateOrder',
@@ -50,6 +66,7 @@ const orderSlice = createSlice({
   initialState: {
     orderDetails: null,
     allOrders: [], // Store all fetched orders
+    filteredOrders: [], // Store orders filtered by date
     loading: false,
     error: null, // For capturing errors
     status: 'idle', // New field to track order status
@@ -59,6 +76,7 @@ const orderSlice = createSlice({
     resetOrderState: (state) => {
       state.orderDetails = null;
       state.allOrders = [];
+      state.filteredOrders = [];
       state.loading = false;
       state.error = null;
       state.status = 'idle';
@@ -100,6 +118,21 @@ const orderSlice = createSlice({
         state.status = 'success';
       })
       .addCase(fetchAllOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.status = 'failed';
+      })
+      // Fetch Orders by Date
+      .addCase(fetchOrdersByDate.pending, (state) => {
+        state.loading = true;
+        state.status = 'pending';
+      })
+      .addCase(fetchOrdersByDate.fulfilled, (state, action) => {
+        state.filteredOrders = action.payload;
+        state.loading = false;
+        state.status = 'success';
+      })
+      .addCase(fetchOrdersByDate.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.status = 'failed';

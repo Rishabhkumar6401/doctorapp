@@ -1,9 +1,23 @@
 const Counter = require('../Model/Counter');
 const Order = require('../Model/Order');
+const DoctorDB = require('../Model/Doctor');
 
 const PlaceOrder = async (req, res) => {
   try {
-    const { name, age, address, phoneNo, referredBy, category, subcategory, fees, discount, finalPayment, paymentMode, referralFee } = req.body;
+    const {
+      name,
+      age,
+      address,
+      phoneNo,
+      referredBy,
+      category,
+      subcategory,
+      fees,
+      discount = 0,
+      finalPayment,
+      paymentMode,
+      referralFee = 0,
+    } = req.body;
 
     // Get today's date in DDMMYYYY format
     const today = new Date();
@@ -25,6 +39,19 @@ const PlaceOrder = async (req, res) => {
 
     // Generate the serial number
     const serialNo = `${todayString}${String(counter.count).padStart(2, '0')}`;
+
+    // Check if referredBy is valid and contains a doctor's ID
+    if (referredBy && referredBy !== '0' && referredBy.toLowerCase() !== 'none') {
+      const doctor = await DoctorDB.findById(referredBy);
+      if (doctor) {
+        // Calculate the commission to be added to the doctor's total
+        const commission = referralFee - discount;
+        if (commission > 0) {
+          doctor.totalCommission += commission;
+          await doctor.save();
+        }
+      }
+    }
 
     // Create a new order
     const newOrder = new Order({
@@ -59,6 +86,7 @@ const PlaceOrder = async (req, res) => {
     });
   }
 };
+
 
 
 
@@ -121,17 +149,39 @@ const EditOrder = async (req, res) => {
     const { orderId } = req.params; // Order ID is passed in the URL parameters
     const updateData = req.body;    // The data to update is passed in the request body
 
-    // Find the order by ID and update it with the new data
-    const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, {
-      new: true,    // This ensures that the updated order is returned
-      runValidators: true, // This ensures the model validation is run during the update
-    });
-
-    if (!updatedOrder) {
+    // Find the existing order
+    const existingOrder = await Order.findById(orderId);
+    if (!existingOrder) {
       return res.status(404).json({
         message: 'Order not found',
       });
     }
+
+    // Check if referredBy is valid and discount is being changed
+    if (
+      existingOrder.referredBy &&
+      existingOrder.referredBy !== '0' &&
+      existingOrder.referredBy.toLowerCase() !== 'none' &&
+      'discount' in updateData &&
+      updateData.discount !== existingOrder.discount
+    ) {
+      const doctor = await DoctorDB.findById(existingOrder.referredBy);
+      if (doctor) {
+        // Update the doctor's commission
+        const oldCommission = existingOrder.referralFee - existingOrder.discount;
+        const newCommission = existingOrder.referralFee - updateData.discount;
+
+        // Adjust the total commission based on the difference
+        doctor.totalCommission += newCommission - oldCommission;
+        await doctor.save();
+      }
+    }
+
+    // Update the order with the new data
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, {
+      new: true,    // This ensures that the updated order is returned
+      runValidators: true, // This ensures the model validation is run during the update
+    });
 
     // Send success response with the updated order data
     res.status(200).json({
@@ -146,6 +196,7 @@ const EditOrder = async (req, res) => {
     });
   }
 };
+
 
 const DeleteOrder = async (req, res) => {
   try {
@@ -218,9 +269,57 @@ const fetchAllOrdersFromDB = async () => {
 //   }
 // };
 
+const fetchFilteredOrders = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    // Check if startDate and endDate are provided
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        message: 'Please provide both startDate and endDate in the query parameters.',
+      });
+    }
+
+    // Convert startDate and endDate to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Ensure endDate includes the entire day
+    end.setHours(23, 59, 59, 999);
+
+    // Fetch orders within the date range
+    const orders = await Order.find({
+      createdAt: {
+        $gte: start,
+        $lte: end,
+      },
+    });
+
+    if (orders.length === 0) {
+      return res.status(404).json({
+        message: 'No orders found in the specified date range.',
+      });
+    }
+
+    // Send success response with filtered orders
+    res.status(200).json({
+      message: 'Orders fetched successfully for the specified date range.',
+      orders,
+    });
+  } catch (error) {
+    console.error('Error fetching filtered orders:', error);
+    res.status(500).json({
+      message: 'Error fetching filtered orders.',
+      error: error.message,
+    });
+  }
+};
 
 
 
 
 
-module.exports = { PlaceOrder, fetchOrder, fetchAllOrder, EditOrder, DeleteOrder, fetchAllOrdersFromDB};
+
+
+
+module.exports = { PlaceOrder, fetchOrder, fetchAllOrder, EditOrder, DeleteOrder, fetchAllOrdersFromDB, fetchFilteredOrders};

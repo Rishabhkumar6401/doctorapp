@@ -39,7 +39,7 @@ const generateExcelReport = async () => {
       excelData.push({
         "Serial No": serialNo++,
         "Doctor Name": doctorData.doctorName,
-        "Overall Total Commission": doctorData.totalCommission.toFixed(2),
+        "Total Commission": doctorData.totalCommission.toFixed(2),
       });
     }
 
@@ -68,13 +68,13 @@ const sendEmailWithAttachment = async (filePath) => {
     const transporter = nodemailer.createTransport({
       service: "gmail", // Use your email service provider
       auth: {
-        user: "rishabh6401@gmail.com", // Replace with your email
-        pass: "jumelvncoskjzssb", // Replace with your email password or app password
+        user: "gozoomtechnologies@gmail.com", // Replace with your email
+        pass: "qwuyqyxwiystcbhf", // Replace with your email password or app password
       },
     });
 
     const mailOptions = {
-      from: "rishabh6401@gmail.com", // Sender address
+      from: "gozoomtechnologies@gmail.com", // Sender address
       to: "gozoomtechnologies@gmail.com", // Recipient email
       subject: "Doctor Commissions Report",
       text: "Please find the attached Doctor Commissions Report.",

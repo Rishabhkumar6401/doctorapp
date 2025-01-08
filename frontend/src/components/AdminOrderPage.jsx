@@ -38,16 +38,15 @@ const AdminOrdersPage = () => {
   useEffect(() => {
     console.log("Updated editOrderData", editOrderData); // This will log the updated data when it's changed
   }, [editOrderData]); // Track when editOrderData changes
-  
 
   const handleEditSubmit = async (formData) => {
     try {
       const orderId = editOrderData._id; // Get the current order ID
       const updatedData = formData; // The updated data from the form
-  
+
       // Dispatch the updateOrder thunk to update the order in the server
       const action = await dispatch(updateOrder({ orderId, updatedData }));
-  
+
       // Log the response for debugging
       if (action.type === 'order/updateOrder/fulfilled') {
         console.log('Order updated successfully', action.payload);
@@ -59,7 +58,7 @@ const AdminOrdersPage = () => {
             order._id === updatedOrder._id ? updatedOrder : order
           )
         );
-        
+
         // Close the modal after the update
         setEditOrderData(null);
       }
@@ -74,7 +73,6 @@ const AdminOrdersPage = () => {
   };
 
   const handleEditOrder = (order) => {
-    
     setEditOrderData(order); // Open the modal with the selected order's data
   };
 
@@ -109,54 +107,62 @@ const AdminOrdersPage = () => {
   });
 
   return (
-    <div className="flex flex-col items-center p-4 space-y-8 mt-24">
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-4">Patient Reports</h1>
+    <div className="flex flex-col p-8 space-y-8 mt-16 bg-gray-50 min-h-screen">
+      <div className="w-full max-w-full bg-white shadow-lg rounded-lg p-6">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6">Patient Orders</h1>
 
-        <div className="mb-4">
-          <input
+        <div className="mb-6 flex justify-between items-center">
+          <Input
             type="text"
             placeholder="Search by name, doctor, or serial no..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <table className="min-w-full border-collapse border border-gray-200">
+        <table className="min-w-full table-auto border-collapse border border-gray-300">
           <thead>
-            <tr>
-              <th className="border border-gray-200 px-4 py-2 text-left">Serial No</th>
-              <th className="border border-gray-200 px-4 py-2 text-left">Patient Name</th>
-              <th className="border border-gray-200 px-12 py-2 text-left">Date</th>
-              <th className="border border-gray-200 px-4 py-2 text-left">Doctor Referral</th>
-              <th className="border border-gray-200 px-4 py-2 text-left">Action</th>
+            <tr className="bg-gray-100 text-gray-600">
+              <th className="border px-6 py-3 text-left">Serial No</th>
+              <th className="border px-6 py-3 text-left">Patient Name</th>
+              <th className="border px-6 py-3 text-left">Date</th>
+              <th className="border px-6 py-3 text-left">Doctor Referral</th>
+              <th className="border px-6 py-3 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((order) => {
-              const doctor = doctors.find((doctor) => doctor._id === order.referredBy);
-
-              return (
-                <tr key={order._id}>
-                  <td className="border border-gray-200 px-4 py-2">{order.serialNo}</td>
-                  <td className="border border-gray-200 px-4 py-2">{order.name}</td>
-                  <td className="border border-gray-200 px-4 py-2">
-                    {format(new Date(order.createdAt), "yyyy-MM-dd")}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2">{doctor ? doctor.name : "None"}</td>
-                  <td className="border border-gray-200 px-4 py-2 text-left">
-                    <div className="flex space-x-2">
-                      <Button onClick={() => handleViewDetails(order)}>View Details</Button>
-                      <Button onClick={() => handleEditOrder(order)}>Edit</Button>
-                      <Button className="ml-2" onClick={() => handleDeleteOrder(order._id)}>
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => {
+                const doctor = doctors.find((doctor) => doctor._id === order.referredBy);
+                return (
+                  <tr key={order._id} className="hover:bg-gray-50 transition-colors duration-200">
+                    <td className="border px-6 py-4">{order.serialNo}</td>
+                    <td className="border px-6 py-4">{order.name}</td>
+                    <td className="border px-6 py-4">
+                      {format(new Date(order.createdAt), "yyyy-MM-dd")}
+                    </td>
+                    <td className="border px-6 py-4">{doctor ? doctor.name : "None"}</td>
+                    <td className="border px-6 py-4">
+                      <div className="flex space-x-3">
+                        <Button onClick={() => handleViewDetails(order)}>View Details</Button>
+                        <Button onClick={() => handleEditOrder(order)}>Edit</Button>
+                        <Button
+                          className="ml-2 text-red-600"
+                          onClick={() => handleDeleteOrder(order._id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center py-4 text-gray-500">No orders found</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -170,10 +176,10 @@ const AdminOrdersPage = () => {
       )}
 
       {editOrderData && (
-        <ModalEditForm 
-          isOpen={true} 
-          onClose={() => setEditOrderData(null)} 
-          onSubmit={handleEditSubmit} 
+        <ModalEditForm
+          isOpen={true}
+          onClose={() => setEditOrderData(null)}
+          onSubmit={handleEditSubmit}
           initialData={editOrderData}
         />
       )}
