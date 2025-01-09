@@ -21,7 +21,6 @@ export const fetchAllOrders = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get('http://localhost:5000/api/fetchAllOrder');
-      console.log(response.data);
       return response.data.orders; // Assuming the response contains the array of orders
     } catch (error) {
       console.error('Error fetching all orders:', error);

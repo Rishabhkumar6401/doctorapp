@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllOrders, fetchOrdersByDate } from "../store/order"; // import fetchOrdersByDate
+import { fetchAllOrders, } from "../store/order"; 
 import { fetchCategories } from "../store/categories";
 import { DateRangePicker } from "react-date-range";// Import date-range picker
 import * as XLSX from "xlsx"; // Import xlsx library
@@ -31,8 +31,33 @@ const [message, setMessage] = useState("");   // Store message
   ]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const { allOrders } = useSelector((state) => state.order);
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollButton(true); // Show the button after scrolling 300px
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // Cleanup the event listener when component unmounts
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", // Smooth scrolling effect
+    });
+  };
 
   // Fetch all orders and categories when the component mounts
   useEffect(() => {
@@ -64,7 +89,6 @@ const [message, setMessage] = useState("");   // Store message
   // Apply date range filter and dispatch action to fetch orders within that range
   const applyDateFilter = () => {
     const { startDate, endDate } = dateRange[0];
-    console.log(selectedDoctor);
   
     // Ensure the date range is treated as full days by setting hours to 00:00:00
     const normalizedStartDate = new Date(startDate).setHours(0, 0, 0, 0);
@@ -202,30 +226,39 @@ const [message, setMessage] = useState("");   // Store message
     const excelData = [];
     let serialNo = 1;
   
-    // Loop through all grouped orders
-    groupedData.forEach((group) => {
-      const doctor = group.doctor; // Access doctor details
-      const orders = group.orders; // Get orders for the doctor
+    // Flatten the grouped data into an array of orders with associated doctor details
+    const flattenedData = groupedData.flatMap((group) =>
+      group.orders.map((order) => ({
+        doctor: group.doctor,
+        order: order,
+      }))
+    );
   
-      // Loop through the orders for the current doctor
-      orders.forEach((order) => {
-        const totalCommission = order.referralFee - order.discount;
+    // Sort the flattened data by doctor name
+    flattenedData.sort((a, b) => {
+      const nameA = a.doctor.name?.toLowerCase() || "unknown";
+      const nameB = b.doctor.name?.toLowerCase() || "unknown";
+      return nameA.localeCompare(nameB);
+    });
   
-        excelData.push({
-          "Serial No": serialNo++, // Increment serial number for each order
-          "Doctor Name": doctor.name || "Unknown", // Use doctor name, default to "Unknown"
-          "Doctor Mobile": doctor.phoneNo || "N/A", // Use doctor phone, default to "N/A"
-          "Doctor Address": doctor.address || "N/A", // Use doctor address, default to "N/A"
-          ...categories.reduce((acc, category) => {
-            // Assign the correct subcategory based on the category name
-            acc[category.name] = order.category === category.name ? order.subcategory || "N/A" : "";
-            return acc;
-          }, {}),
-          Discount: order.discount || 0, // Default to 0 if discount is not available
-          "Final Payment": order.finalPayment || 0, // Default to 0 if finalPayment is not available
-          "Referral Fee": order.referralFee || 0, // Default to 0 if referralFee is not available
-          "Total Commission": totalCommission, // Calculate total commission
-        });
+    // Populate excelData with sorted entries
+    flattenedData.forEach(({ doctor, order }) => {
+      const totalCommission = order.referralFee - order.discount;
+  
+      excelData.push({
+        "Serial No": serialNo++, // Increment serial number for each order
+        "Doctor Name": doctor.name || "Unknown", // Use doctor name, default to "Unknown"
+        "Doctor Mobile": doctor.phoneNo || "N/A", // Use doctor phone, default to "N/A"
+        "Doctor Address": doctor.address || "N/A", // Use doctor address, default to "N/A"
+        ...categories.reduce((acc, category) => {
+          // Assign the correct subcategory based on the category name
+          acc[category.name] = order.category === category.name ? order.subcategory || "N/A" : "";
+          return acc;
+        }, {}),
+        Discount: order.discount || 0, // Default to 0 if discount is not available
+        "Final Payment": order.finalPayment || 0, // Default to 0 if finalPayment is not available
+        "Referral Fee": order.referralFee || 0, // Default to 0 if referralFee is not available
+        "Total Commission": totalCommission, // Calculate total commission
       });
     });
   
@@ -235,6 +268,27 @@ const [message, setMessage] = useState("");   // Store message
   
     XLSX.writeFile(wb, "Detailed_Report.xlsx");
   };
+
+  const applyDoctorFilter = () => {
+    if (!selectedDoctor) {
+      setMessage("Please select a doctor to filter.");
+      return;
+    }
+  
+    const filteredByDoctor = allOrders.filter(
+      (order) => order.referredBy === selectedDoctor
+    );
+  
+    setFilteredOrders(filteredByDoctor);
+  
+    if (filteredByDoctor.length === 0) {
+      setMessage("No records found for the selected doctor.");
+    } else {
+      setMessage(""); // Clear any previous message
+    }
+  };
+  
+  
   
 
 
@@ -275,46 +329,52 @@ const [message, setMessage] = useState("");   // Store message
         </div>
       </SelectContent>
     </Select>
+    <button
+      onClick={applyDoctorFilter}
+      className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
+    >
+      Apply Filter by Doctor
+    </button>
   </div>
 
   {/* Date Picker Section */}
   <div className="flex items-center space-x-4 mt-8">
-  <button
-    onClick={() => setShowDatePicker(!showDatePicker)}
-    className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
-  >
-    {showDatePicker ? "Hide Date Picker" : "Show Date Picker"}
-  </button>
+    <button
+      onClick={() => setShowDatePicker(!showDatePicker)}
+      className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition"
+    >
+      {showDatePicker ? "Hide Date Picker" : "Show Date Picker"}
+    </button>
 
-  {/* Date Range Picker */}
-  {showDatePicker && (
-    <div className="ml-4 bg-white border border-gray-300 shadow-md rounded-lg p-4 w-[600px]">
-      <DateRangePicker
-        editableDateInputs={true}
-        onChange={(item) => setDateRange([item.selection])}
-        moveRangeOnFirstSelection={false}
-        ranges={dateRange}
-        className="text-sm"
-      />
-      <div className="mt-4 flex space-x-4 justify-end">
-        <button
-          onClick={applyDateFilter}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
-        >
-          Apply Date Filter
-        </button>
-        <button
-          onClick={resetDateFilter}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 transition"
-        >
-          Remove Date Filter
-        </button>
+    {/* Date Range Picker */}
+    {showDatePicker && (
+      <div className="ml-4 bg-white border border-gray-300 shadow-md rounded-lg p-4 w-[600px]">
+        <DateRangePicker
+          editableDateInputs={true}
+          onChange={(item) => setDateRange([item.selection])}
+          moveRangeOnFirstSelection={false}
+          ranges={dateRange}
+          className="text-sm"
+        />
+        <div className="mt-4 flex space-x-4 justify-end">
+          <button
+            onClick={applyDateFilter}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
+          >
+            Apply Date Filter
+          </button>
+          <button
+            onClick={resetDateFilter}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 transition"
+          >
+            Remove Filter
+          </button>
+        </div>
       </div>
-    </div>
-  )}
+    )}
+  </div>
 </div>
 
-</div>
 
 <div className="flex justify-end items-center space-x-4 mb-4">
   {/* Search Bar */}
@@ -368,51 +428,65 @@ const [message, setMessage] = useState("");   // Store message
           </tr>
         </thead>
         <tbody>
-          {groupedData.map((group, index) =>
-            group.orders.map((order, orderIndex) => (
-              <tr
-                key={order._id}
-                className={`${orderIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-gray-100`}
-              >
-                <td className="border border-gray-300 p-2">{order.serialNo}</td>
-                <td className="border border-gray-300 p-2">
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </td>
+  {groupedData === null || groupedData.length === 0 ? (
+    <tr>
+      <td colSpan={categories.length + 9} className="text-center py-4 text-gray-500">Loading...</td>
+    </tr>
+  ) : (
+    groupedData.map((group, index) =>
+      group.orders.map((order, orderIndex) => (
+        <tr
+          key={order._id}
+          className={`${orderIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+            } hover:bg-gray-100`}
+        >
+          <td className="border border-gray-300 p-2">{order.serialNo}</td>
+          <td className="border border-gray-300 p-2">
+            {new Date(order.createdAt).toLocaleDateString()}
+          </td>
 
-                <td className="border border-gray-300 p-2">
-                  {group.doctor.name || "Unknown"}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {group.doctor.phoneNo || "N/A"}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {group.doctor.address || "N/A"}
-                </td>
-                {categories.map((category) => (
-                  <td key={category._id} className="border border-gray-300 p-2">
-                    {order.category === category.name
-                      ? order.subcategory || "N/A"
-                      : ""}
-                  </td>
-                ))}
-                <td className="border border-gray-300 p-2">
-                  {order.discount || 0}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {order.finalPayment || 0}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {order.referralFee}
-                </td>
-                <td className="border border-gray-300 p-2">
-                  {order.referralFee - order.discount}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
+          <td className="border border-gray-300 p-2">
+            {group.doctor.name || "Unknown"}
+          </td>
+          <td className="border border-gray-300 p-2">
+            {group.doctor.phoneNo || "N/A"}
+          </td>
+          <td className="border border-gray-300 p-2">
+            {group.doctor.address || "N/A"}
+          </td>
+          {categories.map((category) => (
+            <td key={category._id} className="border border-gray-300 p-2">
+              {order.category === category.name
+                ? order.subcategory || "N/A"
+                : ""}
+            </td>
+          ))}
+          <td className="border border-gray-300 p-2">
+            {order.discount || 0}
+          </td>
+          <td className="border border-gray-300 p-2">
+            {order.finalPayment || 0}
+          </td>
+          <td className="border border-gray-300 p-2">
+            {order.referralFee}
+          </td>
+          <td className="border border-gray-300 p-2">
+            {order.referralFee - order.discount}
+          </td>
+        </tr>
+      ))
+    )
+  )}
+</tbody>
+
       </table>
+      <button
+    onClick={scrollToTop}
+    className="fixed bottom-4 right-4 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition transform hover:scale-105"
+    style={{ display: showScrollButton ? 'block' : 'none' }}
+  >
+    ↑
+  </button>
     </div>
   );
 };

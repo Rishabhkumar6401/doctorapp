@@ -31,16 +31,13 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(checkAuth.pending, (state) => {
-        console.log("Checking auth...");
         state.loading = true;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
-        console.log("Auth check success:", action.payload);
         state.loading = false;
         state.isAuthenticated = action.payload.success;
       })
       .addCase(checkAuth.rejected, (state, action) => {
-        console.log("Auth check failed:", action.error);
         state.loading = false;
         state.isAuthenticated = false;
       });

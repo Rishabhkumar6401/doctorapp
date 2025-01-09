@@ -13,7 +13,6 @@ const AdminLogin = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     const credentials = { username, password };
-    console.log(credentials)
     dispatch(login(username, password));
   };
 

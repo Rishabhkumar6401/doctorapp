@@ -10,7 +10,7 @@ import { fetchDoctors } from '../../store/doctor';
 import { fetchCategories } from '../../store/categories';
 import { addPatient } from '../../store/patient';
 import {  fetchSubcategoryDetail } from '../../store/subcategories';
-import { placeOrder } from '../../store/order';
+import { placeOrder,resetOrderState } from '../../store/order';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronsUpDown } from "lucide-react"
  
@@ -100,20 +100,20 @@ const PatientForm = () => {
   const handleCloseModal = () => {
     setIsAddDoctorModalOpen(false);
   };
-  useEffect(() => {
-   
-    console.log(isNewEntry )
-   
-    
-  }, [NewphoneNo ]);
+
  
   
-  useEffect(() => {
-    if (status === 'success') {
-      // dispatch(resetOrderState()); // Reset the order state after navigating
-      navigate('/print-report', { state: { orderDetails: orderDetails } });
-    }
-  }, [status, navigate, dispatch]);
+  // useEffect(() => {
+  //   dispatch(resetOrderState());
+  // }, [dispatch]);
+
+  // // Navigate on success
+  // useEffect(() => {
+  //   if (status === "success") {
+  //     dispatch(resetOrderState()); // Reset after navigating
+  //     navigate("/print-report", { state: { orderDetails } });
+  //   }
+  // }, [status, navigate, dispatch, orderDetails]);
 
   useEffect(() => {
     const fetchSubcategoriesByCategory = async () => {
@@ -138,7 +138,6 @@ const PatientForm = () => {
    
   
     if (valueS) {
-      console.log(valueS)
       dispatch(fetchSubcategoryDetail(valueS));
     }
   }, [valueS]);
@@ -204,36 +203,51 @@ const PatientForm = () => {
     e.preventDefault();
   
     // Check if required fields are filled
-    if (!formData.phoneNo || !formData.name || !formData.age  || !formData.address || !formData.category || !formData.fees || !formData.finalPayment
-     ) {
-      console.log(formData.referredBy)
+    if (
+      !formData.phoneNo || 
+      !formData.name || 
+      !formData.age || 
+      !formData.address || 
+      !formData.category || 
+      !formData.fees || 
+      !formData.finalPayment
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
   
-    // First, handle adding new patient if isNewEntry is true
-    if (isNewEntry) {
-      const patientData = {
-        phoneNo: formData.phoneNo,
-        name: formData.name,
-        age: formData.age,
-        address: formData.address,
-      };
+    try {
+      // First, handle adding new patient if isNewEntry is true
+      if (isNewEntry) {
+        const patientData = {
+          phoneNo: formData.phoneNo,
+          name: formData.name,
+          age: formData.age,
+          address: formData.address,
+        };
   
-      // Dispatch action to add new patient
-      await dispatch(addPatient(patientData));
+        // Dispatch action to add new patient
+        await dispatch(addPatient(patientData));
+      }
   
-      // After adding the patient, place the order
-      dispatch(placeOrder(formData));
-      
-    } else {
-      // If it's not a new entry, simply place the order
-      dispatch(placeOrder(formData));
+      // Place the order
+      const orderResponse = await dispatch(placeOrder(formData));
+  
+      // Check if the order was placed successfully
+      if (orderResponse.meta.requestStatus === "fulfilled") {
+        dispatch(resetOrderState()); // Reset the order state after successful placement
+        navigate("/print-report", { state: { orderDetails: orderResponse.payload } });
+      } else {
+        toast.error("Failed to place order. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      toast.error("An error occurred. Please try again.");
     }
   };
   
+  
   useEffect(() => {
-    console.log(selectedPatient)
     // Check if selectedPatient is available
     if (selectedPatient) {
       // If selectedPatient exists, fill the form with its data
@@ -269,7 +283,6 @@ const PatientForm = () => {
 
       });
     } else if (patients.length === 0) {
-      console.log("dsf")
       // If no patients, reset the form to blank
       setFormData({
         phoneNo: NewphoneNo || "",

@@ -117,22 +117,22 @@ const AdminNavbar = () => {
             Category
           </a>
           <a
-            href="/patients"
-            className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-          >
-            Patient
-          </a>
-          <a
             href="/admin/doctor"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
             Doctor
           </a>
           <a
-            href="/contact"
+            href="/admin/monthlyReport"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
-            Contact Us
+            Reports
+          </a>
+          <a
+            href="/admin/reports"
+            className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
+          >
+            Patients
           </a>
           <button
             onClick={handleLogout}

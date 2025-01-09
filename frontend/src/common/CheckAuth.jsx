@@ -11,14 +11,11 @@ function CheckAuth({ children }) {
     // Check authentication on component mount
     const checkAuth = async () => {
       try {
-        console.log("Checking auth...");
         const response = await axios.get("http://localhost:5000/api/checkauth", {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token"),
           },
         });
-
-        console.log("Auth check success:", response.data);
         setIsAuthenticated(response.data.success);
       } catch (error) {
         console.error("Auth check failed:", error);
@@ -31,9 +28,6 @@ function CheckAuth({ children }) {
     checkAuth();
   }, [location]);
 
-  console.log("Current Path:", location.pathname);
-  console.log("Is Authenticated:", isAuthenticated);
-  console.log("Loading State:", loading);
 
   // Show a loading indicator while the auth check is in progress
   if (loading) {
@@ -48,13 +42,11 @@ function CheckAuth({ children }) {
 
   // Redirect authenticated users trying to access the login page
   if (isAuthenticated && location.pathname === "/admin/login") {
-    console.log("Redirecting to dashboard...");
     return <Navigate to="/admin/dashboard" replace />;
   }
 
   // Redirect unauthenticated users trying to access admin routes
   if (!isAuthenticated && location.pathname.includes("/admin") && location.pathname !== "/admin/login") {
-    console.log("Redirecting to login...");
     return <Navigate to="/admin/login" replace />;
   }
 

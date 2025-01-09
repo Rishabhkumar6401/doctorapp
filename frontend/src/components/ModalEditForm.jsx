@@ -37,7 +37,6 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   // Initialize form data if editing existing data
   useEffect(() => {
     if (initialData) {
-      console.log("Initial Data received in Modal:", initialData.fees);
       setFormData({
         phoneNo: initialData.phoneNo || "",
         name: initialData.name || "",
@@ -114,7 +113,6 @@ const ModalEditForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   }, [formData.category]);
 
   useEffect(() => {
-    console.log(valueS)
      
     
       if (valueS) {

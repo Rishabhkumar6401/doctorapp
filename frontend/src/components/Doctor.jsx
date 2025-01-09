@@ -59,12 +59,12 @@ const Doctor = () => {
           >
             Add New Doctor
           </button>
-          <button
+          {/* <button
             className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
             onClick={() => navigate("/admin/doctorReport")}
           >
             Doctors Report
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -96,6 +96,9 @@ const Doctor = () => {
                   Address
                 </th>
                 <th className="py-3 px-4 text-left font-medium text-gray-600 border-b">
+                  Overall Total Commison
+                </th>
+                <th className="py-3 px-4 text-left font-medium text-gray-600 border-b">
                   Actions
                 </th>
               </tr>
@@ -107,6 +110,7 @@ const Doctor = () => {
                     <td className="py-3 px-4 border-b">{doctor.name}</td>
                     <td className="py-3 px-4 border-b">{doctor.phoneNo}</td>
                     <td className="py-3 px-4 border-b">{doctor.address}</td>
+                    <td className="py-3 px-4 border-b">{doctor.totalCommission}</td>
                     <td className="py-3 px-4 border-b">
                       <button
                         onClick={() => handleEdit(doctor)}

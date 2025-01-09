@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 
 // Middleware to check if admin is logged in
 const checkAdminAuth = (req, res, next) => {
-  // console.log("daefs")
   const authHeader = req.headers.authorization;
   if(!authHeader){
     res.status(401).json({

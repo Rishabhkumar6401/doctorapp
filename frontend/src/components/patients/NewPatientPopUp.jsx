@@ -25,14 +25,12 @@ const NewPatientPopUp = ({ setIsAddPatient, phoneNo }) => {
       address,
       phoneNo: phone, // Ensure phoneNo is set from the input
     };
-    console.log(patientData)
 
     try {
       const response = await axios.post('http://localhost:5000/api/patient/add', patientData);
 
       if (response.status === 200) {
         // Handle success (you can display a success message here or close the modal)
-        console.log('Patient added successfully:', response.data);
         setIsAddPatient(false); // Close the modal after successful submission
       }
     } catch (error) {
