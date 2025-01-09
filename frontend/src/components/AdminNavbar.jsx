@@ -65,7 +65,7 @@ const AdminNavbar = () => {
               href="/admin/reports"
               className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Patients
+              Alter Report
             </a>
             <button
               onClick={handleLogout}
@@ -132,7 +132,7 @@ const AdminNavbar = () => {
             href="/admin/reports"
             className="text-gray-600 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
           >
-            Patients
+            Alter Report
           </a>
           <button
             onClick={handleLogout}

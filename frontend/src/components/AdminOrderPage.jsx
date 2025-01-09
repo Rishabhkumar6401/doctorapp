@@ -226,7 +226,7 @@ const AdminOrdersPage = () => {
   return (
     <div className="flex flex-col p-8 space-y-8 mt-16 bg-gray-50 min-h-screen">
       <div className="w-full max-w-full bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-3xl font-semibold text-gray-800 mb-6">Patient Orders</h1>
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6">Alter Report</h1>
 
         <div className="mb-6 flex justify-between items-center">
           <Input
