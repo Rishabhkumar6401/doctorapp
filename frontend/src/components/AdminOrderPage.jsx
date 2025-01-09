@@ -40,7 +40,7 @@ const AdminOrdersPage = () => {
       key: "selection",
     });
     setFilterApplied(false); // Reset the filter application state
-    setShowDateRange(!showDateRange);
+    setShowDateRange(false);
   };
   
 
@@ -139,6 +139,7 @@ const AdminOrdersPage = () => {
           }
         }
         alert("Selected orders deleted successfully!");
+        resetDateFilter();
         dispatch(fetchAllOrders());
       } catch (error) {
         console.error("Error deleting selected orders:", error);
@@ -280,7 +281,7 @@ const AdminOrdersPage = () => {
 
         <Button
             onClick={resetDateFilter}
-            className="px-4 py-2 pr-4 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 transition"
+            className="px-4 py-2 ml-4 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 transition"
           >
             Remove Filter
           </Button>
