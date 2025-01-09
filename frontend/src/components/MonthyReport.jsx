@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllOrders, } from "../store/order"; 
+import { fetchAllOrders, fetchOrdersByDate } from "../store/order"; // import fetchOrdersByDate
 import { fetchCategories } from "../store/categories";
 import { DateRangePicker } from "react-date-range";// Import date-range picker
 import * as XLSX from "xlsx"; // Import xlsx library
@@ -89,6 +89,7 @@ const [message, setMessage] = useState("");   // Store message
   // Apply date range filter and dispatch action to fetch orders within that range
   const applyDateFilter = () => {
     const { startDate, endDate } = dateRange[0];
+    console.log(selectedDoctor);
   
     // Ensure the date range is treated as full days by setting hours to 00:00:00
     const normalizedStartDate = new Date(startDate).setHours(0, 0, 0, 0);
@@ -320,7 +321,7 @@ const [message, setMessage] = useState("");   // Store message
           />
         </div>
         <div className="max-h-48 overflow-auto">
-          <SelectItem value="0">All</SelectItem>
+          {/* <SelectItem value="0">All</SelectItem> */}
           {filteredDoctors.map((doctor) => (
             <SelectItem key={doctor._id} value={doctor._id}>
               {doctor.name}
@@ -428,57 +429,50 @@ const [message, setMessage] = useState("");   // Store message
           </tr>
         </thead>
         <tbody>
-  {groupedData === null || groupedData.length === 0 ? (
-    <tr>
-      <td colSpan={categories.length + 9} className="text-center py-4 text-gray-500">Loading...</td>
-    </tr>
-  ) : (
-    groupedData.map((group, index) =>
-      group.orders.map((order, orderIndex) => (
-        <tr
-          key={order._id}
-          className={`${orderIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-            } hover:bg-gray-100`}
-        >
-          <td className="border border-gray-300 p-2">{order.serialNo}</td>
-          <td className="border border-gray-300 p-2">
-            {new Date(order.createdAt).toLocaleDateString()}
-          </td>
+          {groupedData.map((group, index) =>
+            group.orders.map((order, orderIndex) => (
+              <tr
+                key={order._id}
+                className={`${orderIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  } hover:bg-gray-100`}
+              >
+                <td className="border border-gray-300 p-2">{order.serialNo}</td>
+                <td className="border border-gray-300 p-2">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </td>
 
-          <td className="border border-gray-300 p-2">
-            {group.doctor.name || "Unknown"}
-          </td>
-          <td className="border border-gray-300 p-2">
-            {group.doctor.phoneNo || "N/A"}
-          </td>
-          <td className="border border-gray-300 p-2">
-            {group.doctor.address || "N/A"}
-          </td>
-          {categories.map((category) => (
-            <td key={category._id} className="border border-gray-300 p-2">
-              {order.category === category.name
-                ? order.subcategory || "N/A"
-                : ""}
-            </td>
-          ))}
-          <td className="border border-gray-300 p-2">
-            {order.discount || 0}
-          </td>
-          <td className="border border-gray-300 p-2">
-            {order.finalPayment || 0}
-          </td>
-          <td className="border border-gray-300 p-2">
-            {order.referralFee}
-          </td>
-          <td className="border border-gray-300 p-2">
-            {order.referralFee - order.discount}
-          </td>
-        </tr>
-      ))
-    )
-  )}
-</tbody>
-
+                <td className="border border-gray-300 p-2">
+                  {group.doctor.name || "Unknown"}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {group.doctor.phoneNo || "N/A"}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {group.doctor.address || "N/A"}
+                </td>
+                {categories.map((category) => (
+                  <td key={category._id} className="border border-gray-300 p-2">
+                    {order.category === category.name
+                      ? order.subcategory || "N/A"
+                      : ""}
+                  </td>
+                ))}
+                <td className="border border-gray-300 p-2">
+                  {order.discount || 0}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {order.finalPayment || 0}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {order.referralFee}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  {order.referralFee - order.discount}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
       </table>
       <button
     onClick={scrollToTop}

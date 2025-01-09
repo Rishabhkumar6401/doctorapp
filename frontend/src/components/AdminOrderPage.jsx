@@ -306,79 +306,79 @@ const AdminOrdersPage = () => {
 
 
 
-        <table className="min-w-full table-auto border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100 text-gray-600">
-            <th className="border px-6 py-3 text-left">
-            Select{' '}
-            <input
-              type="checkbox"
-              checked={selectAll}
-              onChange={handleSelectAll}
-              className="form-checkbox h-5 w-5 text-blue-600"
-            />
-          </th>
-              <th className="border px-6 py-3 text-left">Serial No</th>
-              <th className="border px-6 py-3 text-left">Doctor Ref</th>
-              <th className="border px-12 py-3 text-left">Date</th>
-              <th className="border px-6 py-3 text-left">Patient name</th>
-              <th className="border px-6 py-3 text-left">Category</th>
-              <th className="border px-6 py-3 text-left">SubCategory</th>
-              <th className="border px-6 py-3 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-  {ordersLoading ? (
-    <tr>
-      <td colSpan="8" className="text-center py-4 text-gray-500">
-        Loading...
-      </td>
+<table className="min-w-full table-auto border-collapse border border-gray-300">
+  <thead>
+    <tr className="bg-gray-100 text-gray-600">
+      <th className="border p-2 text-left">
+        Select{' '}
+        <input
+          type="checkbox"
+          checked={selectAll}
+          onChange={handleSelectAll}
+          className="form-checkbox h-5 w-5 text-blue-600"
+        />
+      </th>
+      <th className="border p-2 text-left">Serial No</th>
+      <th className="border p-2 text-left">Doctor Ref</th>
+      <th className="border p-2 text-left">Date</th>
+      <th className="border p-2 text-left">Patient Name</th>
+      <th className="border p-2 text-left">Category</th>
+      <th className="border p-2 text-left">SubCategory</th>
+      <th className="border p-2 text-left">Action</th>
     </tr>
-  ) : filteredOrders.length > 0 ? (
-    filteredOrders.map((order) => {
-      const doctor = doctors.find((doctor) => doctor._id === order.referredBy);
-      return (
-        <tr key={order._id} className="hover:bg-gray-50 transition-colors duration-200">
-          <td className="border px-6 py-4">
-            <input
-              type="checkbox"
-              checked={selectedOrders.includes(order._id)}
-              onChange={() => handleSelectOrder(order._id)}
-            />
-          </td>
-          <td className="border px-6 py-4">{order.serialNo}</td>
-          <td className="border px-6 py-4">{doctor ? doctor.name : "None"}</td>
-          <td className="border px-3 py-4">
-            {format(new Date(order.createdAt), "yyyy-MM-dd")}
-          </td>
-          <td className="border px-6 py-4">{order.name}</td>
-          <td className="border px-6 py-4">{order.category}</td>
-          <td className="border px-6 py-4">{order.subcategory}</td>
-          <td className="border px-6 py-4">
-            <div className="flex space-x-3">
-              <Button onClick={() => handleViewDetails(order)}>View Details</Button>
-              <Button onClick={() => handleEditOrder(order)}>Edit</Button>
-              <Button
-                className="ml-2 text-red-600"
-                onClick={() => handleDeleteOrder(order._id)}
-              >
-                Delete
-              </Button>
-            </div>
-          </td>
-        </tr>
-      );
-    })
-  ) : (
-    <tr>
-      <td colSpan="8" className="text-center py-4 text-gray-500">
-        No orders found
-      </td>
-    </tr>
-  )}
-</tbody>
+  </thead>
+  <tbody>
+    {ordersLoading ? (
+      <tr>
+        <td colSpan="8" className="text-center py-4 text-gray-500">
+          Loading...
+        </td>
+      </tr>
+    ) : filteredOrders.length > 0 ? (
+      filteredOrders.map((order) => {
+        const doctor = doctors.find((doctor) => doctor._id === order.referredBy);
+        return (
+          <tr key={order._id} className="hover:bg-gray-50 transition-colors duration-200">
+            <td className="border p-2">
+              <input
+                type="checkbox"
+                checked={selectedOrders.includes(order._id)}
+                onChange={() => handleSelectOrder(order._id)}
+              />
+            </td>
+            <td className="border p-2">{order.serialNo}</td>
+            <td className="border p-2">{doctor ? doctor.name : "None"}</td>
+            <td className="border p-2">
+              {format(new Date(order.createdAt), "yyyy-MM-dd")}
+            </td>
+            <td className="border p-2">{order.name}</td>
+            <td className="border p-2">{order.category}</td>
+            <td className="border p-2">{order.subcategory}</td>
+            <td className="border p-2">
+              <div className="flex space-x-2">
+                <Button onClick={() => handleViewDetails(order)}>View Details</Button>
+                <Button onClick={() => handleEditOrder(order)}>Edit</Button>
+                <Button
+                  className="ml-2 text-red-600"
+                  onClick={() => handleDeleteOrder(order._id)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </td>
+          </tr>
+        );
+      })
+    ) : (
+      <tr>
+        <td colSpan="8" className="text-center py-4 text-gray-500">
+          No orders found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
 
-        </table>
 
 
       </div>
