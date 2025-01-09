@@ -251,10 +251,25 @@ const AdminOrdersPage = () => {
           <div className="mb-6">
             {/* Date Range Picker */}
             <DateRangePicker
-              ranges={[selectedDateRange]}
-              onChange={(item) => setSelectedDateRange(item.selection)}
-              locale={enGB}
-            />
+  ranges={[selectedDateRange]}
+  onChange={(item) => {
+    const startDate = item.selection.startDate;
+    const endDate = item.selection.endDate;
+
+    // Normalize the date range
+    const normalizedStartDate = new Date(startDate).setHours(0, 0, 0, 0); // Start of the day
+    const normalizedEndDate = new Date(endDate).setHours(23, 59, 59, 999); // End of the day
+
+    // Update the selected date range
+    setSelectedDateRange({
+      startDate: new Date(normalizedStartDate),
+      endDate: new Date(normalizedEndDate),
+      key: "selection",
+    });
+  }}
+  locale={enGB}
+/>
+
           </div>
           <Button
           onClick={handleApplyFilter}
