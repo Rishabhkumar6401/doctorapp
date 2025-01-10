@@ -8,6 +8,7 @@ import "react-date-range/dist/styles.css"; // Import default styles
 import "react-date-range/dist/theme/default.css"; // Import theme styles
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { RefreshCcw } from 'lucide-react';
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
@@ -288,6 +289,31 @@ const [message, setMessage] = useState("");   // Store message
       setMessage(""); // Clear any previous message
     }
   };
+
+  const resetAllFilters = () => {
+    // Reset doctor filter
+    setSelectedDoctor(null); // Clear the selected doctor
+    setSearchQueryDoc("");   // Clear the search query for doctors
+  
+    // Reset date filter
+    setDateRange([
+      {
+        startDate: new Date(),
+        endDate: new Date(),
+        key: "selection",
+      },
+    ]);
+  
+    // Reset filtered orders and clear messages
+    setFilteredOrders(allOrders); // Reset to show all orders
+    setMessage(""); // Clear any messages
+  
+    // Hide date picker if it's visible
+    setShowDatePicker(false);
+  };
+  
+
+  
   
   
   
@@ -304,32 +330,33 @@ const [message, setMessage] = useState("");   // Store message
       Select Doctor
     </Label>
     <Select
-      onValueChange={setSelectedDoctor}
-      className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      <SelectTrigger id="doctor">
-        <SelectValue placeholder="Select a doctor" />
-      </SelectTrigger>
-      <SelectContent className="bg-white border border-gray-300 shadow-md rounded-lg max-h-60">
-        <div className="sticky top-0 bg-white p-2 border-b border-gray-300">
-          <Input
-            type="text"
-            placeholder="Search doctor"
-            value={searchQueryDoc}
-            onChange={(e) => setSearchQueryDoc(e.target.value)}
-            className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="max-h-48 overflow-auto">
-          {/* <SelectItem value="0">All</SelectItem> */}
-          {filteredDoctors.map((doctor) => (
-            <SelectItem key={doctor._id} value={doctor._id}>
-              {doctor.name}
-            </SelectItem>
-          ))}
-        </div>
-      </SelectContent>
-    </Select>
+  value={selectedDoctor || ""} // Ensure the value resets to default
+  onValueChange={setSelectedDoctor}
+  className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
+  <SelectTrigger id="doctor">
+    <SelectValue placeholder="Select a doctor" />
+  </SelectTrigger>
+  <SelectContent className="bg-white border border-gray-300 shadow-md rounded-lg max-h-60">
+    <div className="sticky top-0 bg-white p-2 border-b border-gray-300">
+      <Input
+        type="text"
+        placeholder="Search doctor"
+        value={searchQueryDoc}
+        onChange={(e) => setSearchQueryDoc(e.target.value)}
+        className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+    <div className="max-h-48 overflow-auto">
+      {filteredDoctors.map((doctor) => (
+        <SelectItem key={doctor._id} value={doctor._id}>
+          {doctor.name}
+        </SelectItem>
+      ))}
+    </div>
+  </SelectContent>
+</Select>
+
     <button
       onClick={applyDoctorFilter}
       className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
@@ -378,6 +405,16 @@ const [message, setMessage] = useState("");   // Store message
 
 
 <div className="flex justify-end items-center space-x-4 mb-4">
+   {/* Remove All Filters Button */}
+   <button
+  onClick={() => resetAllFilters()}
+  className="flex items-center justify-center space-x-1 p-1.5 border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+  title="Remove All Filters"
+>
+  <RefreshCcw className="w-3.5 h-3.5 text-blue-500" /> {/* Smaller icon */}
+  <span className="text-xs font-medium text-gray-600">Reset Filters</span> {/* Text added */}
+</button>
+
   {/* Search Bar */}
   <input
     type="text"
